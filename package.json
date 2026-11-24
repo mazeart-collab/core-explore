@@ -1,0 +1,34 @@
+{
+  "name": "core-explore",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "data:import": "node scripts/import-rome.js",
+    "data:import:sample": "node scripts/import-rome.js --from=scripts/fixtures/rome-sample --out=data/rome_base.sample.json",
+    "data:enrich": "node scripts/enrich-metiers.js"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.13.0",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "adm-zip": "^0.6.1",
+    "csv-parse": "^7.0.3",
+    "oxlint": "^1.90.0",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.6"
+  }
+}

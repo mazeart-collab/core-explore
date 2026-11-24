@@ -1,0 +1,8 @@
+code_ogr,libelle_appellation_long,libelle_appellation_court,code_rome,transition_eco,transition_num,transition_demo,emploi_reglemente,emploi_cadre,classification,origine,code_rome_parent,peu_usite
+20001,Développeur / Développeuse informatique,Développeur informatique,M1805,N,O,N,N,O,,,,N
+20002,"Développeur / Développeuse web",Développeur web,M1805,N,O,N,N,O,,,,N
+20003,Ingénieur / Ingénieure d'études et développement,Ingénieur études,M1805,N,O,N,N,O,,,,N
+20004,Jardinier / Jardinière paysagiste,Jardinier paysagiste,A1203,O,N,N,N,N,,,,N
+20005,Ouvrier / Ouvrière d'entretien des espaces verts,Ouvrier espaces verts,A1203,O,N,N,N,N,,,,N
+20006,Infirmier / Infirmière,Infirmier,J1506,N,N,O,O,N,,,,N
+20007,Infirmier / Infirmière en soins généraux,Infirmier soins généraux,J1506,N,N,O,O,N,,,,N
