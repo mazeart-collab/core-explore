@@ -7,7 +7,15 @@
     "api/parse-intent.js": {
       "includeFiles": "data/taxonomies.json",
       "maxDuration": 30
+    },
+    "api/marche.js": {
+      "maxDuration": 20
     }
   },
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

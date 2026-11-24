@@ -1,16 +1,17 @@
-import { useMetiers } from '../lib/MetiersContext'
+import { useEffect, useState } from 'react'
 import { DEPARTEMENTS, TENSIONS, lienFormations, lienOffres } from '../lib/marche'
 import { clean } from '../lib/text'
 import { useStoredState } from '../lib/useStoredState'
 
 /** Badge discret de tension, affiché seulement quand la donnée existe. */
-export function TensionBadge({ metier }) {
-  const t = TENSIONS[metier.marche_emploi?.niveau_tension]
+export function TensionBadge({ metier, niveau }) {
+  const me = metier?.marche_emploi
+  const t = TENSIONS[niveau ?? me?.niveau_tension]
   if (!t) return null
   return (
     <span
       className={`inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${t.classes}`}
-      title={`${metier.marche_emploi.source}`}
+      title={me?.source ? `Source : ${me.source}` : undefined}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
       {t.libelle}
@@ -39,13 +40,47 @@ function Bouton({ href, children, primary }) {
   )
 }
 
+/** Chiffres du département choisi, demandés à /api/marche (mis en cache côté serveur). */
+function useMarcheDepartement(codeRome, dept) {
+  const [etat, setEtat] = useState({ cle: '', statut: 'vide', data: null })
+  const cle = dept ? `${codeRome}|${dept}` : ''
+  useEffect(() => {
+    if (!cle) return
+    const ctrl = new AbortController()
+    fetch(`/api/marche?rome=${encodeURIComponent(codeRome)}&dep=${encodeURIComponent(dept)}`, { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((data) => setEtat({ cle, statut: 'ok', data }))
+      .catch((e) => {
+        if (e.name !== 'AbortError') setEtat({ cle, statut: 'erreur', data: null })
+      })
+    return () => ctrl.abort()
+  }, [cle, codeRome, dept])
+  return etat.cle === cle ? etat : { statut: cle ? 'chargement' : 'vide', data: null }
+}
+
+const aDesChiffres = (m) =>
+  m && (TENSIONS[m.niveau_tension] || m.offres_12_mois !== null || m.demandeurs_emploi !== null)
+
+function Chiffre({ titre, children, detail }) {
+  return (
+    <div className="rounded-lg bg-slate-50 p-3">
+      <dt className="text-xs text-slate-500">{titre}</dt>
+      <dd className="mt-1 text-lg font-semibold text-slate-900">{children}</dd>
+      {detail && <dd className="mt-0.5 text-xs text-slate-500">{detail}</dd>}
+    </div>
+  )
+}
+
 /** Encart « Réalité du marché près de chez vous » de la fiche métier. */
 export function MarcheLocal({ metier }) {
-  const { meta } = useMetiers()
   const [dept, setDept] = useStoredState('core-explore:departement', '', (v) => (typeof v === 'string' ? v : ''))
-  const me = metier.marche_emploi
-  const t = TENSIONS[me?.niveau_tension]
   const nomDept = DEPARTEMENTS.find(([c]) => c === dept)?.[1]
+  const local = useMarcheDepartement(metier.code_rome, nomDept ? dept : '')
+  const national = metier.marche_emploi
+  const localOk = local.statut === 'ok' && aDesChiffres(local.data)
+  const m = localOk ? local.data : national
+  const zone = localOk ? nomDept : 'France entière'
+  const t = TENSIONS[m?.niveau_tension]
 
   return (
     <section aria-labelledby="marche" className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -70,40 +105,49 @@ export function MarcheLocal({ metier }) {
         </label>
       </div>
 
-      {t ? (
+      {local.statut === 'chargement' && (
+        <p className="mt-4 text-sm text-slate-500" role="status">
+          Chargement des chiffres pour {nomDept}…
+        </p>
+      )}
+
+      {aDesChiffres(m) ? (
         <div className="mt-4 space-y-2">
+          <p className="text-sm font-medium text-slate-700">{zone}</p>
           <dl className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg bg-slate-50 p-3">
-              <dt className="text-xs text-slate-500">Tension du marché</dt>
+              <dt className="text-xs text-slate-500">Difficultés de recrutement</dt>
               <dd className="mt-1">
-                <TensionBadge metier={metier} />
+                {t ? <TensionBadge metier={metier} niveau={m.niveau_tension} /> : <span className="text-sm text-slate-500">Non mesurées</span>}
               </dd>
+              {m.periode?.tension && <dd className="mt-1 text-xs text-slate-500">{m.periode.tension}</dd>}
             </div>
-            {me.projets_recrutement !== null && (
-              <div className="rounded-lg bg-slate-50 p-3">
-                <dt className="text-xs text-slate-500">Projets de recrutement en France</dt>
-                <dd className="mt-1 text-lg font-semibold text-slate-900">{fmt(me.projets_recrutement)}</dd>
-              </div>
+            {m.offres_12_mois !== null && (
+              <Chiffre titre="Offres d’emploi sur 12 mois" detail={m.periode?.offres && `jusqu’au ${m.periode.offres}`}>
+                {fmt(m.offres_12_mois)}
+              </Chiffre>
             )}
-            {me.part_difficultes_recrutement !== null && (
-              <div className="rounded-lg bg-slate-50 p-3">
-                <dt className="text-xs text-slate-500">Recrutements jugés difficiles</dt>
-                <dd className="mt-1 text-lg font-semibold text-slate-900">{me.part_difficultes_recrutement} %</dd>
-              </div>
+            {m.demandeurs_emploi !== null && (
+              <Chiffre titre="Demandeurs d’emploi (catégorie A)" detail={m.periode?.demandeurs}>
+                {fmt(m.demandeurs_emploi)}
+              </Chiffre>
             )}
           </dl>
           <p className="text-xs text-slate-500">
-            Source : {me.source}
-            {me.perimetre?.length ? ` · chiffres de la famille de métiers « ${me.perimetre.map((p) => p.replace(/^\S+\s/, '')).join(' », « ')} »` : ''}
-            {meta?.marche_emploi?.methode ? '. Niveau de tension déduit de la part des recrutements difficiles.' : '.'}
-            {dept ? ' Les chiffres sont nationaux ; les offres ci-dessous sont filtrées sur votre département.' : ''}
+            Source : {m.source}
+            {m.annee ? ` (${m.annee})` : ''}.
+            {dept && !localOk && local.statut !== 'chargement'
+              ? ` Chiffres de ${nomDept} indisponibles pour le moment : ce sont les chiffres nationaux.`
+              : ''}
           </p>
         </div>
       ) : (
-        <p className="mt-4 text-sm text-slate-600">
-          Les indicateurs officiels du marché de l’emploi ne sont pas encore disponibles pour ce métier. Les liens
-          ci-dessous donnent accès aux offres et statistiques à jour.
-        </p>
+        local.statut !== 'chargement' && (
+          <p className="mt-4 text-sm text-slate-600">
+            Les indicateurs officiels du marché de l’emploi ne sont pas encore disponibles pour ce métier. Les liens
+            ci-dessous donnent accès aux offres et statistiques à jour.
+          </p>
+        )
       )}
 
       <div className="mt-5 grid gap-2 sm:grid-cols-3">

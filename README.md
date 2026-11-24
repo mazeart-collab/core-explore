@@ -84,7 +84,9 @@ Deux workflows manuels sont disponibles dans l'onglet **Actions** du dépôt :
 1. **« 1. Importer ROME 4.0 »** : génère `data/rome_base.json` et le committe sur la branche choisie.
 2. **« 2. Enrichir les métiers »** : paramètre `limit` (`20` par défaut ; vide ou `all` pour tous les métiers restants). Committe `public/data/metiers.json` et `data/.enrich-progress.jsonl`, même si le run échoue ou est annulé, pour que le run suivant reprenne sans repayer.
 
-3. **« 3. Mettre à jour le marché de l'emploi »** : ajoute à chaque métier un bloc `marche_emploi` (niveau de tension, projets de recrutement, part des recrutements difficiles, source et année) à partir de l'enquête BMO de France Travail (Open Data, sans IA). Nécessite la table de correspondance `data/correspondances/bmo_rome.csv` (ou son URL dans le champ « correspondance ») : voir `data/correspondances/README.md`. Test hors ligne : `node scripts/fixtures/marche-sample/make.mjs` puis `npm run data:marche -- --bmo=scripts/fixtures/marche-sample/bmo-sample.xlsx --correspondance=scripts/fixtures/marche-sample/bmo_rome.csv --out=/tmp/metiers.json`.
+3. **« 3. Mettre à jour le marché de l'emploi »** : ajoute à chaque métier un bloc `marche_emploi` (niveau de tension, indice France Travail de 1 à 5, offres sur 12 mois, demandeurs d'emploi de catégorie A, source et période) lu dans l'API gratuite « Marché du travail » de France Travail, sans IA. Les blocs `officiel_rome` et `enrichi_ia` ne sont jamais modifiés. Nécessite les secrets `FRANCE_TRAVAIL_CLIENT_ID` et `FRANCE_TRAVAIL_CLIENT_SECRET` (application créée sur francetravail.io avec l'API « Marché du travail »). Le champ « limite » permet un essai rapide sur quelques métiers.
+
+   Les mêmes deux variables, ajoutées dans Vercel (Settings › Environment Variables), activent les chiffres par département de l'encart « Réalité du marché près de chez vous » (fonction `api/marche.js`, réponses mises en cache 7 jours). Sans elles, l'encart affiche les chiffres nationaux.
 
 Prérequis pour le workflow 2 : ajouter la clé API dans **Settings > Secrets and variables > Actions > New repository secret**, nom `ANTHROPIC_API_KEY`.
 

@@ -300,7 +300,7 @@ function ExplorerContent() {
               Privilégier les métiers qui recrutent
               <span className="block text-xs text-slate-500">
                 {hasMarche
-                  ? 'À étoiles égales, les métiers en tension (source France Travail, enquête BMO) passent en premier.'
+                  ? 'À étoiles égales, les métiers en tension (source France Travail) passent en premier.'
                   : 'Disponible dès que les indicateurs du marché de l’emploi auront été importés.'}
               </span>
             </span>

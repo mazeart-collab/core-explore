@@ -3,12 +3,12 @@ name: "3. Mettre à jour le marché de l'emploi"
 on:
   workflow_dispatch:
     inputs:
-      correspondance:
-        description: "Table de correspondance métier BMO / FAP → code ROME (URL d'un CSV ou xlsx). Vide = data/correspondances/bmo_rome.csv"
+      limite:
+        description: "Nombre de métiers à interroger (vide = tous, environ 15 minutes). Ex. 20 pour un essai rapide."
         type: string
         default: ""
-      bmo:
-        description: "Fichier BMO (URL xlsx). Vide = le plus récent sur data.gouv.fr / francetravail.org"
+      codes:
+        description: "Codes ROME précis, séparés par des virgules (facultatif). Ex. A1101,M1805"
         type: string
         default: ""
 
@@ -22,7 +22,7 @@ concurrency:
 jobs:
   marche:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
@@ -36,15 +36,13 @@ jobs:
       - name: Installer les dépendances
         run: npm ci
 
-      - name: Ajouter les indicateurs du marché de l'emploi
+      - name: Interroger l'API Marché du travail de France Travail
         env:
-          CORRESPONDANCE_URL: ${{ inputs.correspondance }}
-          BMO_URL: ${{ inputs.bmo }}
-        run: |
-          ARGS=()
-          [ -n "$CORRESPONDANCE_URL" ] && ARGS+=("--correspondance=$CORRESPONDANCE_URL")
-          [ -n "$BMO_URL" ] && ARGS+=("--bmo=$BMO_URL")
-          npm run data:marche -- "${ARGS[@]}"
+          FRANCE_TRAVAIL_CLIENT_ID: ${{ secrets.FRANCE_TRAVAIL_CLIENT_ID }}
+          FRANCE_TRAVAIL_CLIENT_SECRET: ${{ secrets.FRANCE_TRAVAIL_CLIENT_SECRET }}
+          LIMITE: ${{ inputs.limite }}
+          CODES: ${{ inputs.codes }}
+        run: npm run data:marche
 
       - name: Enregistrer metiers.json
         env:
@@ -57,6 +55,6 @@ jobs:
             echo "Aucun changement à enregistrer."
             exit 0
           fi
-          git commit -m "Données : marché de l'emploi BMO ($(date -u +%Y-%m-%d))"
+          git commit -m "Données : marché de l'emploi France Travail ($(date -u +%Y-%m-%d))"
           git pull --rebase origin "$BRANCH"
           git push origin "HEAD:$BRANCH"

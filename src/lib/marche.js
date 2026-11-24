@@ -1,4 +1,4 @@
-// Marché de l'emploi : libellés, départements et liens externes (aucun appel API).
+// Marché de l'emploi : libellés, départements et liens externes.
 
 export const TENSIONS = {
   forte: { libelle: 'Recrute fortement', classes: 'bg-emerald-50 text-emerald-800 ring-emerald-200', rang: 0 },
