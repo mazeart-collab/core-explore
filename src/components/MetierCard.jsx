@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { UNIVERS, label } from '../lib/taxonomies'
 import { clean, shortDescription } from '../lib/text'
 import { useSelection } from '../lib/SelectionContext'
+import { TensionBadge } from './Marche'
 import SelectionButtons from './SelectionButtons'
 import { Tag } from './ui'
 
@@ -38,6 +39,7 @@ export default function MetierCard({ metier, aside, children }) {
         <SelectionButtons metier={metier} />
       </div>
       <SecteursTags metier={metier} />
+      <TensionBadge metier={metier} />
       <p className="text-sm text-slate-600">{shortDescription(metier.officiel_rome.definition)}</p>
       {children}
       <Link

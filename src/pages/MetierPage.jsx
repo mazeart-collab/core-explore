@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import JourneeType from '../components/JourneeType'
+import { MarcheLocal } from '../components/Marche'
 import { SecteursTags } from '../components/MetierCard'
 import SelectionButtons from '../components/SelectionButtons'
 import { DataGate, Tag } from '../components/ui'
@@ -286,6 +287,7 @@ function MetierContent() {
         </div>
       </header>
       <JourneeType metier={metier} />
+      <MarcheLocal metier={metier} />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Officiel o={o} />
         <Enrichi e={metier.enrichi_ia} />

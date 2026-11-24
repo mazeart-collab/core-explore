@@ -325,6 +325,14 @@ function pickVaried(fiches, n) {
 }
 
 function writeOutput(base, done) {
+  // Conserve les indicateurs du marché de l'emploi (scripts/enrichir-marche.mjs) déjà présents.
+  let previous = null
+  try {
+    previous = JSON.parse(fs.readFileSync(OUTPUT, 'utf8'))
+  } catch {
+    // pas encore de fichier
+  }
+  const marche = new Map((previous?.metiers || []).filter((m) => m.marche_emploi).map((m) => [m.code_rome, m.marche_emploi]))
   const metiers = base.fiches
     .filter((f) => done.has(f.code_rome))
     .map((f) => ({
@@ -332,6 +340,7 @@ function writeOutput(base, done) {
       intitule: f.intitule,
       officiel_rome: f,
       enrichi_ia: done.get(f.code_rome),
+      ...(marche.has(f.code_rome) ? { marche_emploi: marche.get(f.code_rome) } : {}),
     }))
   const output = {
     meta: {
@@ -344,6 +353,7 @@ function writeOutput(base, done) {
       complet: metiers.length === base.fiches.length,
       avertissement:
         "Les champs « enrichi_ia » sont générés automatiquement par un modèle d'IA à partir des données officielles et peuvent contenir des approximations. Les champs « officiel_rome » proviennent du ROME 4.0 (France Travail).",
+      ...(previous?.meta?.marche_emploi ? { marche_emploi: previous.meta.marche_emploi } : {}),
     },
     metiers,
   }
