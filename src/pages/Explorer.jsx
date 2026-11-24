@@ -164,7 +164,7 @@ function ExplorerContent() {
   const [closedGroups, setClosedGroups] = useState(() => new Set([2]))
 
   const nbCriteria = countCriteria(criteria)
-  const { results, excludedCount, hiddenCount } = useMemo(() => rank(metiers, criteria), [metiers, criteria])
+  const { results, hiddenCount } = useMemo(() => rank(metiers, criteria), [metiers, criteria])
   const groups = useMemo(
     () =>
       NIVEAUX.map((niveau) => ({ niveau, results: results.filter((r) => r.stars === niveau.etoiles) })).filter(
@@ -309,10 +309,8 @@ function ExplorerContent() {
             />
           ))}
 
-          {nbCriteria > 0 && (excludedCount > 0 || hiddenCount > 0) && (
+          {nbCriteria > 0 && hiddenCount > 0 && (
             <p className="text-xs text-slate-500">
-              {excludedCount > 0 &&
-                `${plural(excludedCount, 'métier')} écarté${excludedCount > 1 ? 's' : ''} par vos critères « Indispensable ». `}
               {hiddenCount > 0 &&
                 `${plural(hiddenCount, 'autre métier')} partage${hiddenCount > 1 ? 'nt' : ''} un point commun avec vos choix, sans être assez proche${hiddenCount > 1 ? 's' : ''} pour être affiché${hiddenCount > 1 ? 's' : ''}.`}
             </p>
