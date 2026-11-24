@@ -120,7 +120,7 @@ export function MarcheLocal({ metier }) {
               <dd className="mt-1">
                 {t ? <TensionBadge metier={metier} niveau={m.niveau_tension} /> : <span className="text-sm text-slate-500">Non mesurées</span>}
               </dd>
-              {m.periode?.tension && <dd className="mt-1 text-xs text-slate-500">{m.periode.tension}</dd>}
+              {m.periode?.tension && <dd className="mt-1 text-xs text-slate-500">{m.periode.tension.replace(/^ANNEE\b/i, "Année")}</dd>}
             </div>
             {m.offres_12_mois !== null && (
               <Chiffre titre="Offres d’emploi sur 12 mois" detail={m.periode?.offres && `jusqu’au ${m.periode.offres}`}>
