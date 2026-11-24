@@ -7,7 +7,14 @@
     "nb_metiers": 1923,
     "nb_fiches_rome": 1923,
     "complet": true,
-    "avertissement": "Les champs « enrichi_ia » sont générés automatiquement par un modèle d'IA à partir des données officielles et peuvent contenir des approximations. Les champs « officiel_rome » proviennent du ROME 4.0 (France Travail)."
+    "avertissement": "Les champs « enrichi_ia » sont générés automatiquement par un modèle d'IA à partir des données officielles et peuvent contenir des approximations. Les champs « officiel_rome » proviennent du ROME 4.0 (France Travail).",
+    "marche_emploi": {
+      "source": "France Travail – API Marché du travail",
+      "annee": 2025,
+      "url_source": "https://francetravail.io/data/api/marche-travail",
+      "date_mise_a_jour": "2026-11-24T22:50:04.171Z",
+      "methode": "Indice de tension « difficultés de recrutement » de France Travail (1 à 5, France entière) : 4 ou 5 = recrute fortement, 3 = équilibré, 1 ou 2 = concurrentiel. Offres enregistrées sur 12 mois et demandeurs d’emploi de catégorie A, même source."
+    }
   },
   "metiers": [
     {
@@ -236,6 +243,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T16:46:44.480Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 4,
+        "offres_12_mois": 6930,
+        "demandeurs_emploi": 1350,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -466,6 +486,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:23:26.546Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 4,
+        "offres_12_mois": 3450,
+        "demandeurs_emploi": 140,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -706,6 +739,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:28:17.734Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 5,
+        "offres_12_mois": 1770,
+        "demandeurs_emploi": 780,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -924,6 +970,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:59:39.209Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": 2270,
+        "demandeurs_emploi": 4570,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -1159,6 +1218,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:28:28.219Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": 10940,
+        "demandeurs_emploi": 31680,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -1432,6 +1504,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:59:53.159Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 4,
+        "offres_12_mois": 890,
+        "demandeurs_emploi": 570,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -1670,6 +1755,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:28:41.843Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 5,
+        "offres_12_mois": 150,
+        "demandeurs_emploi": 120,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -1910,6 +2008,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T18:00:04.980Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": 1420,
+        "demandeurs_emploi": 450,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -2146,6 +2257,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:28:57.026Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": 520,
+        "demandeurs_emploi": 40,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -2414,6 +2538,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T18:00:16.813Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": 28080,
+        "demandeurs_emploi": 19000,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -2639,6 +2776,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:29:06.727Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 5,
+        "offres_12_mois": 2870,
+        "demandeurs_emploi": 730,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -2816,6 +2966,19 @@
           "centres_interet : 0 valeur(s), minimum attendu 1",
           "motivations : 0 valeur(s), minimum attendu 1"
         ]
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 5,
+        "offres_12_mois": 620,
+        "demandeurs_emploi": 210,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -3048,6 +3211,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:29:20.235Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": 6740,
+        "demandeurs_emploi": 690,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -3282,6 +3458,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T18:00:41.474Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 5,
+        "offres_12_mois": 120,
+        "demandeurs_emploi": 20,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -3517,6 +3706,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:23:42.159Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 5,
+        "offres_12_mois": 350,
+        "demandeurs_emploi": 20,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -3710,6 +3912,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:29:33.359Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": 40,
+        "demandeurs_emploi": 10,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -3909,6 +4124,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T18:00:59.657Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "concurrentielle",
+        "indice_tension": 2,
+        "offres_12_mois": null,
+        "demandeurs_emploi": null,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": null,
+          "demandeurs": null
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -4170,6 +4398,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:29:44.832Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 4,
+        "offres_12_mois": 0,
+        "demandeurs_emploi": 0,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -4427,6 +4668,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T18:01:09.942Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 4,
+        "offres_12_mois": 10,
+        "demandeurs_emploi": null,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": null
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
@@ -4723,6 +4977,19 @@
         "modele": "claude-haiku-5-5",
         "date_enrichissement": "2026-11-24T17:29:59.258Z",
         "avertissements": []
+      },
+      "marche_emploi": {
+        "niveau_tension": "forte",
+        "indice_tension": 5,
+        "offres_12_mois": 0,
+        "demandeurs_emploi": 0,
+        "periode": {
+          "tension": "ANNEE 2025",
+          "offres": "2ème trimestre 2026",
+          "demandeurs": "2ème trimestre 2026"
+        },
+        "source": "France Travail – API Marché du travail",
+        "annee": 2025
       }
     },
     {
