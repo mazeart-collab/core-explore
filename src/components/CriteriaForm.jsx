@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { COMPETENCE_ETATS, IMPORTANCES } from '../lib/matching'
 import { taxonomies } from '../lib/taxonomies'
 
@@ -47,10 +46,10 @@ function Segmented({ options, value, onChange, size = 'sm', label }) {
   )
 }
 
-function Panel({ title, hint, count, open, onToggle, children }) {
-  const id = `panel-${title.replace(/\W+/g, '-')}`
+function Panel({ panelId, title, hint, count, open, onToggle, children }) {
+  const id = `panel-${panelId}`
   return (
-    <section className="rounded-xl border border-slate-200 bg-white">
+    <section id={`criteres-${panelId}`} className="scroll-mt-20 rounded-xl border border-slate-200 bg-white">
       <h3>
         <button
           type="button"
@@ -148,9 +147,12 @@ function ConditionRow({ critere, pref, onChange }) {
   )
 }
 
-export default function CriteriaForm({ criteria, setCriteria }) {
-  const [openPanel, setOpenPanel] = useState('activites')
-  const panel = (id) => ({ open: openPanel === id, onToggle: () => setOpenPanel((p) => (p === id ? null : id)) })
+export default function CriteriaForm({ criteria, setCriteria, openPanel, setOpenPanel }) {
+  const panel = (id) => ({
+    panelId: id,
+    open: openPanel === id,
+    onToggle: () => setOpenPanel((p) => (p === id ? null : id)),
+  })
   const update = (key, fn) => setCriteria((c) => ({ ...c, [key]: fn(c[key]) }))
 
   return (
