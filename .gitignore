@@ -1,0 +1,36 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environnement (clé API)
+.env
+.env.*
+!.env.example
+
+# Pipeline de données : fichiers bruts téléchargés et état de reprise
+data/raw/
+data/.enrich-progress.jsonl
+
+# Sorties de test
+data/*.sample.json

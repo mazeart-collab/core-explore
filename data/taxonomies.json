@@ -1,0 +1,1665 @@
+{
+  "version": "1.0.0",
+  "description": "Référentiels (taxonomies) du projet CORE Explore. Les identifiants (id) sont stables et utilisés par l'enrichissement des métiers ; les libellés peuvent évoluer.",
+  "univers_professionnels": {
+    "familles": [
+      {
+        "id": "nature",
+        "libelle": "Nature, environnement et ressources",
+        "univers": [
+          "agriculture_et_grandes_cultures",
+          "viticulture_et_oenologie",
+          "elevage",
+          "soins_et_bien_etre_animal",
+          "foret_et_filiere_bois",
+          "peche_mer_et_aquaculture",
+          "paysage_jardins_et_horticulture",
+          "environnement_ecologie_et_biodiversite",
+          "eau_dechets_et_economie_circulaire",
+          "energies_renouvelables_et_transition_energetique"
+        ]
+      },
+      {
+        "id": "industrie",
+        "libelle": "Construction, industrie et technologies",
+        "univers": [
+          "batiment",
+          "travaux_publics_et_genie_civil",
+          "architecture_urbanisme_et_amenagement",
+          "mecanique_metallurgie_et_usinage",
+          "electricite_electronique_et_automatismes",
+          "chimie_plasturgie_et_materiaux",
+          "agroalimentaire_et_industries_de_transformation",
+          "aeronautique_automobile_ferroviaire_et_naval",
+          "informatique_logiciels_et_developpement",
+          "donnees_intelligence_artificielle_et_cybersecurite"
+        ]
+      },
+      {
+        "id": "commerce",
+        "libelle": "Commerce, gestion et développement",
+        "univers": [
+          "vente_et_commerce_de_detail",
+          "commerce_international_import_export_et_negoce",
+          "marketing_et_communication_d_entreprise",
+          "relation_client_et_centres_de_contact",
+          "banque_et_assurance",
+          "finance_comptabilite_et_audit",
+          "ressources_humaines_et_recrutement",
+          "gestion_administrative_et_assistanat",
+          "conseil_et_strategie_d_entreprise",
+          "immobilier"
+        ]
+      },
+      {
+        "id": "transport",
+        "libelle": "Transport et logistique",
+        "univers": [
+          "transport_routier_de_marchandises",
+          "transport_de_voyageurs",
+          "ferroviaire",
+          "aerien_et_aeroportuaire",
+          "maritime_et_fluvial",
+          "logistique_et_entreposage",
+          "supply_chain_et_approvisionnement",
+          "livraison_messagerie_et_dernier_kilometre",
+          "mobilites_urbaines_et_douces",
+          "maintenance_de_vehicules_et_d_engins"
+        ]
+      },
+      {
+        "id": "sante_social",
+        "libelle": "Santé, social et accompagnement",
+        "univers": [
+          "medecine",
+          "soins_infirmiers_et_aide_soignance",
+          "reeducation_et_professions_paramedicales",
+          "pharmacie_biologie_et_analyses_medicales",
+          "sante_mentale_et_psychologie",
+          "aide_a_domicile_et_grand_age",
+          "handicap_et_inclusion",
+          "petite_enfance",
+          "travail_social_et_insertion",
+          "esthetique_coiffure_et_bien_etre"
+        ]
+      },
+      {
+        "id": "creation",
+        "libelle": "Création, culture et médias",
+        "univers": [
+          "arts_plastiques_et_arts_visuels",
+          "design",
+          "mode_textile_et_accessoires",
+          "artisanat_d_art_et_metiers_du_patrimoine",
+          "musique_et_son",
+          "spectacle_vivant",
+          "cinema_audiovisuel_et_animation",
+          "jeu_video_et_creation_numerique",
+          "journalisme_et_medias",
+          "edition_livre_et_ecriture"
+        ]
+      },
+      {
+        "id": "tourisme",
+        "libelle": "Tourisme, loisirs et expériences",
+        "univers": [
+          "hotellerie_et_hebergement",
+          "restauration_et_cuisine",
+          "metiers_de_bouche",
+          "tourisme_voyages_et_guidage",
+          "evenementiel_salons_et_congres",
+          "sport_coaching_et_activites_physiques",
+          "animation_et_centres_de_loisirs",
+          "musees_sites_et_patrimoine_culturel",
+          "activites_de_pleine_nature_et_outdoor",
+          "parcs_d_attractions_jeux_et_divertissement"
+        ]
+      },
+      {
+        "id": "institutions",
+        "libelle": "Institutions, société et engagement",
+        "univers": [
+          "administration_publique_et_collectivites",
+          "justice_et_droit",
+          "defense_et_armees",
+          "securite_police_et_secours",
+          "enseignement_et_education",
+          "formation_orientation_et_emploi",
+          "recherche_scientifique",
+          "politique_diplomatie_et_affaires_internationales",
+          "associations_ong_et_humanitaire",
+          "economie_sociale_et_solidaire_developpement_local"
+        ]
+      }
+    ],
+    "univers": [
+      {
+        "id": "agriculture_et_grandes_cultures",
+        "numero": 1,
+        "libelle": "Agriculture et grandes cultures",
+        "famille": "nature"
+      },
+      {
+        "id": "viticulture_et_oenologie",
+        "numero": 2,
+        "libelle": "Viticulture et œnologie",
+        "famille": "nature"
+      },
+      {
+        "id": "elevage",
+        "numero": 3,
+        "libelle": "Élevage",
+        "famille": "nature"
+      },
+      {
+        "id": "soins_et_bien_etre_animal",
+        "numero": 4,
+        "libelle": "Soins et bien-être animal",
+        "famille": "nature"
+      },
+      {
+        "id": "foret_et_filiere_bois",
+        "numero": 5,
+        "libelle": "Forêt et filière bois",
+        "famille": "nature"
+      },
+      {
+        "id": "peche_mer_et_aquaculture",
+        "numero": 6,
+        "libelle": "Pêche, mer et aquaculture",
+        "famille": "nature"
+      },
+      {
+        "id": "paysage_jardins_et_horticulture",
+        "numero": 7,
+        "libelle": "Paysage, jardins et horticulture",
+        "famille": "nature"
+      },
+      {
+        "id": "environnement_ecologie_et_biodiversite",
+        "numero": 8,
+        "libelle": "Environnement, écologie et biodiversité",
+        "famille": "nature"
+      },
+      {
+        "id": "eau_dechets_et_economie_circulaire",
+        "numero": 9,
+        "libelle": "Eau, déchets et économie circulaire",
+        "famille": "nature"
+      },
+      {
+        "id": "energies_renouvelables_et_transition_energetique",
+        "numero": 10,
+        "libelle": "Énergies renouvelables et transition énergétique",
+        "famille": "nature"
+      },
+      {
+        "id": "batiment",
+        "numero": 11,
+        "libelle": "Bâtiment (gros œuvre et second œuvre)",
+        "famille": "industrie"
+      },
+      {
+        "id": "travaux_publics_et_genie_civil",
+        "numero": 12,
+        "libelle": "Travaux publics et génie civil",
+        "famille": "industrie"
+      },
+      {
+        "id": "architecture_urbanisme_et_amenagement",
+        "numero": 13,
+        "libelle": "Architecture, urbanisme et aménagement",
+        "famille": "industrie"
+      },
+      {
+        "id": "mecanique_metallurgie_et_usinage",
+        "numero": 14,
+        "libelle": "Mécanique, métallurgie et usinage",
+        "famille": "industrie"
+      },
+      {
+        "id": "electricite_electronique_et_automatismes",
+        "numero": 15,
+        "libelle": "Électricité, électronique et automatismes",
+        "famille": "industrie"
+      },
+      {
+        "id": "chimie_plasturgie_et_materiaux",
+        "numero": 16,
+        "libelle": "Chimie, plasturgie et matériaux",
+        "famille": "industrie"
+      },
+      {
+        "id": "agroalimentaire_et_industries_de_transformation",
+        "numero": 17,
+        "libelle": "Agroalimentaire et industries de transformation",
+        "famille": "industrie"
+      },
+      {
+        "id": "aeronautique_automobile_ferroviaire_et_naval",
+        "numero": 18,
+        "libelle": "Aéronautique, automobile, ferroviaire et naval (industrie)",
+        "famille": "industrie"
+      },
+      {
+        "id": "informatique_logiciels_et_developpement",
+        "numero": 19,
+        "libelle": "Informatique, logiciels et développement",
+        "famille": "industrie"
+      },
+      {
+        "id": "donnees_intelligence_artificielle_et_cybersecurite",
+        "numero": 20,
+        "libelle": "Données, intelligence artificielle et cybersécurité",
+        "famille": "industrie"
+      },
+      {
+        "id": "vente_et_commerce_de_detail",
+        "numero": 21,
+        "libelle": "Vente et commerce de détail",
+        "famille": "commerce"
+      },
+      {
+        "id": "commerce_international_import_export_et_negoce",
+        "numero": 22,
+        "libelle": "Commerce international, import-export et négoce",
+        "famille": "commerce"
+      },
+      {
+        "id": "marketing_et_communication_d_entreprise",
+        "numero": 23,
+        "libelle": "Marketing et communication d'entreprise",
+        "famille": "commerce"
+      },
+      {
+        "id": "relation_client_et_centres_de_contact",
+        "numero": 24,
+        "libelle": "Relation client et centres de contact",
+        "famille": "commerce"
+      },
+      {
+        "id": "banque_et_assurance",
+        "numero": 25,
+        "libelle": "Banque et assurance",
+        "famille": "commerce"
+      },
+      {
+        "id": "finance_comptabilite_et_audit",
+        "numero": 26,
+        "libelle": "Finance, comptabilité et audit",
+        "famille": "commerce"
+      },
+      {
+        "id": "ressources_humaines_et_recrutement",
+        "numero": 27,
+        "libelle": "Ressources humaines et recrutement",
+        "famille": "commerce"
+      },
+      {
+        "id": "gestion_administrative_et_assistanat",
+        "numero": 28,
+        "libelle": "Gestion administrative et assistanat",
+        "famille": "commerce"
+      },
+      {
+        "id": "conseil_et_strategie_d_entreprise",
+        "numero": 29,
+        "libelle": "Conseil et stratégie d'entreprise",
+        "famille": "commerce"
+      },
+      {
+        "id": "immobilier",
+        "numero": 30,
+        "libelle": "Immobilier",
+        "famille": "commerce"
+      },
+      {
+        "id": "transport_routier_de_marchandises",
+        "numero": 31,
+        "libelle": "Transport routier de marchandises",
+        "famille": "transport"
+      },
+      {
+        "id": "transport_de_voyageurs",
+        "numero": 32,
+        "libelle": "Transport de voyageurs (bus, car, taxi, VTC)",
+        "famille": "transport"
+      },
+      {
+        "id": "ferroviaire",
+        "numero": 33,
+        "libelle": "Ferroviaire",
+        "famille": "transport"
+      },
+      {
+        "id": "aerien_et_aeroportuaire",
+        "numero": 34,
+        "libelle": "Aérien et aéroportuaire",
+        "famille": "transport"
+      },
+      {
+        "id": "maritime_et_fluvial",
+        "numero": 35,
+        "libelle": "Maritime et fluvial",
+        "famille": "transport"
+      },
+      {
+        "id": "logistique_et_entreposage",
+        "numero": 36,
+        "libelle": "Logistique et entreposage",
+        "famille": "transport"
+      },
+      {
+        "id": "supply_chain_et_approvisionnement",
+        "numero": 37,
+        "libelle": "Supply chain et approvisionnement",
+        "famille": "transport"
+      },
+      {
+        "id": "livraison_messagerie_et_dernier_kilometre",
+        "numero": 38,
+        "libelle": "Livraison, messagerie et dernier kilomètre",
+        "famille": "transport"
+      },
+      {
+        "id": "mobilites_urbaines_et_douces",
+        "numero": 39,
+        "libelle": "Mobilités urbaines et douces",
+        "famille": "transport"
+      },
+      {
+        "id": "maintenance_de_vehicules_et_d_engins",
+        "numero": 40,
+        "libelle": "Maintenance de véhicules et d'engins",
+        "famille": "transport"
+      },
+      {
+        "id": "medecine",
+        "numero": 41,
+        "libelle": "Médecine",
+        "famille": "sante_social"
+      },
+      {
+        "id": "soins_infirmiers_et_aide_soignance",
+        "numero": 42,
+        "libelle": "Soins infirmiers et aide-soignance",
+        "famille": "sante_social"
+      },
+      {
+        "id": "reeducation_et_professions_paramedicales",
+        "numero": 43,
+        "libelle": "Rééducation et professions paramédicales",
+        "famille": "sante_social"
+      },
+      {
+        "id": "pharmacie_biologie_et_analyses_medicales",
+        "numero": 44,
+        "libelle": "Pharmacie, biologie et analyses médicales",
+        "famille": "sante_social"
+      },
+      {
+        "id": "sante_mentale_et_psychologie",
+        "numero": 45,
+        "libelle": "Santé mentale et psychologie",
+        "famille": "sante_social"
+      },
+      {
+        "id": "aide_a_domicile_et_grand_age",
+        "numero": 46,
+        "libelle": "Aide à domicile et grand âge",
+        "famille": "sante_social"
+      },
+      {
+        "id": "handicap_et_inclusion",
+        "numero": 47,
+        "libelle": "Handicap et inclusion",
+        "famille": "sante_social"
+      },
+      {
+        "id": "petite_enfance",
+        "numero": 48,
+        "libelle": "Petite enfance",
+        "famille": "sante_social"
+      },
+      {
+        "id": "travail_social_et_insertion",
+        "numero": 49,
+        "libelle": "Travail social et insertion",
+        "famille": "sante_social"
+      },
+      {
+        "id": "esthetique_coiffure_et_bien_etre",
+        "numero": 50,
+        "libelle": "Esthétique, coiffure et bien-être",
+        "famille": "sante_social"
+      },
+      {
+        "id": "arts_plastiques_et_arts_visuels",
+        "numero": 51,
+        "libelle": "Arts plastiques et arts visuels",
+        "famille": "creation"
+      },
+      {
+        "id": "design",
+        "numero": 52,
+        "libelle": "Design (graphique, produit, espace)",
+        "famille": "creation"
+      },
+      {
+        "id": "mode_textile_et_accessoires",
+        "numero": 53,
+        "libelle": "Mode, textile et accessoires",
+        "famille": "creation"
+      },
+      {
+        "id": "artisanat_d_art_et_metiers_du_patrimoine",
+        "numero": 54,
+        "libelle": "Artisanat d'art et métiers du patrimoine",
+        "famille": "creation"
+      },
+      {
+        "id": "musique_et_son",
+        "numero": 55,
+        "libelle": "Musique et son",
+        "famille": "creation"
+      },
+      {
+        "id": "spectacle_vivant",
+        "numero": 56,
+        "libelle": "Spectacle vivant (théâtre, danse, cirque)",
+        "famille": "creation"
+      },
+      {
+        "id": "cinema_audiovisuel_et_animation",
+        "numero": 57,
+        "libelle": "Cinéma, audiovisuel et animation",
+        "famille": "creation"
+      },
+      {
+        "id": "jeu_video_et_creation_numerique",
+        "numero": 58,
+        "libelle": "Jeu vidéo et création numérique",
+        "famille": "creation"
+      },
+      {
+        "id": "journalisme_et_medias",
+        "numero": 59,
+        "libelle": "Journalisme et médias",
+        "famille": "creation"
+      },
+      {
+        "id": "edition_livre_et_ecriture",
+        "numero": 60,
+        "libelle": "Édition, livre et écriture",
+        "famille": "creation"
+      },
+      {
+        "id": "hotellerie_et_hebergement",
+        "numero": 61,
+        "libelle": "Hôtellerie et hébergement",
+        "famille": "tourisme"
+      },
+      {
+        "id": "restauration_et_cuisine",
+        "numero": 62,
+        "libelle": "Restauration et cuisine",
+        "famille": "tourisme"
+      },
+      {
+        "id": "metiers_de_bouche",
+        "numero": 63,
+        "libelle": "Métiers de bouche (boulangerie, pâtisserie, boucherie…)",
+        "famille": "tourisme"
+      },
+      {
+        "id": "tourisme_voyages_et_guidage",
+        "numero": 64,
+        "libelle": "Tourisme, voyages et guidage",
+        "famille": "tourisme"
+      },
+      {
+        "id": "evenementiel_salons_et_congres",
+        "numero": 65,
+        "libelle": "Événementiel, salons et congrès",
+        "famille": "tourisme"
+      },
+      {
+        "id": "sport_coaching_et_activites_physiques",
+        "numero": 66,
+        "libelle": "Sport, coaching et activités physiques",
+        "famille": "tourisme"
+      },
+      {
+        "id": "animation_et_centres_de_loisirs",
+        "numero": 67,
+        "libelle": "Animation et centres de loisirs",
+        "famille": "tourisme"
+      },
+      {
+        "id": "musees_sites_et_patrimoine_culturel",
+        "numero": 68,
+        "libelle": "Musées, sites et patrimoine culturel",
+        "famille": "tourisme"
+      },
+      {
+        "id": "activites_de_pleine_nature_et_outdoor",
+        "numero": 69,
+        "libelle": "Activités de pleine nature et outdoor",
+        "famille": "tourisme"
+      },
+      {
+        "id": "parcs_d_attractions_jeux_et_divertissement",
+        "numero": 70,
+        "libelle": "Parcs d'attractions, jeux et divertissement",
+        "famille": "tourisme"
+      },
+      {
+        "id": "administration_publique_et_collectivites",
+        "numero": 71,
+        "libelle": "Administration publique et collectivités",
+        "famille": "institutions"
+      },
+      {
+        "id": "justice_et_droit",
+        "numero": 72,
+        "libelle": "Justice et droit",
+        "famille": "institutions"
+      },
+      {
+        "id": "defense_et_armees",
+        "numero": 73,
+        "libelle": "Défense et armées",
+        "famille": "institutions"
+      },
+      {
+        "id": "securite_police_et_secours",
+        "numero": 74,
+        "libelle": "Sécurité, police et secours",
+        "famille": "institutions"
+      },
+      {
+        "id": "enseignement_et_education",
+        "numero": 75,
+        "libelle": "Enseignement et éducation",
+        "famille": "institutions"
+      },
+      {
+        "id": "formation_orientation_et_emploi",
+        "numero": 76,
+        "libelle": "Formation, orientation et emploi",
+        "famille": "institutions"
+      },
+      {
+        "id": "recherche_scientifique",
+        "numero": 77,
+        "libelle": "Recherche scientifique",
+        "famille": "institutions"
+      },
+      {
+        "id": "politique_diplomatie_et_affaires_internationales",
+        "numero": 78,
+        "libelle": "Politique, diplomatie et affaires internationales",
+        "famille": "institutions"
+      },
+      {
+        "id": "associations_ong_et_humanitaire",
+        "numero": 79,
+        "libelle": "Associations, ONG et humanitaire",
+        "famille": "institutions"
+      },
+      {
+        "id": "economie_sociale_et_solidaire_developpement_local",
+        "numero": 80,
+        "libelle": "Économie sociale et solidaire, développement local",
+        "famille": "institutions"
+      }
+    ]
+  },
+  "activites": {
+    "categories": [
+      {
+        "id": "creer",
+        "libelle": "Créer et imaginer",
+        "activites": [
+          {
+            "id": "imaginer_des_idees_et_des_concepts",
+            "libelle": "Imaginer des idées et des concepts"
+          },
+          {
+            "id": "dessiner_illustrer_mettre_en_forme_visuellement",
+            "libelle": "Dessiner, illustrer, mettre en forme visuellement"
+          },
+          {
+            "id": "ecrire_et_rediger_des_contenus",
+            "libelle": "Écrire et rédiger des contenus"
+          },
+          {
+            "id": "composer_interpreter_se_produire_sur_scene",
+            "libelle": "Composer, interpréter, se produire sur scène"
+          },
+          {
+            "id": "concevoir_des_produits_des_objets_ou_des_espaces",
+            "libelle": "Concevoir des produits, des objets ou des espaces"
+          },
+          {
+            "id": "inventer_des_solutions_nouvelles",
+            "libelle": "Inventer des solutions nouvelles"
+          }
+        ]
+      },
+      {
+        "id": "fabriquer",
+        "libelle": "Fabriquer et agir concrètement",
+        "activites": [
+          {
+            "id": "fabriquer_assembler_produire",
+            "libelle": "Fabriquer, assembler, produire"
+          },
+          {
+            "id": "construire_installer_poser",
+            "libelle": "Construire, installer, poser"
+          },
+          {
+            "id": "reparer_entretenir_depanner",
+            "libelle": "Réparer, entretenir, dépanner"
+          },
+          {
+            "id": "piloter_des_machines_ou_des_engins",
+            "libelle": "Piloter des machines ou des engins"
+          },
+          {
+            "id": "cultiver_elever_s_occuper_du_vivant",
+            "libelle": "Cultiver, élever, s'occuper du vivant"
+          },
+          {
+            "id": "preparer_cuisiner_transformer_des_produits",
+            "libelle": "Préparer, cuisiner, transformer des produits"
+          },
+          {
+            "id": "conduire_transporter_livrer",
+            "libelle": "Conduire, transporter, livrer"
+          },
+          {
+            "id": "intervenir_sur_le_terrain",
+            "libelle": "Intervenir sur le terrain (sécurité, secours)"
+          }
+        ]
+      },
+      {
+        "id": "organiser",
+        "libelle": "Organiser et coordonner",
+        "activites": [
+          {
+            "id": "planifier_et_organiser_le_travail",
+            "libelle": "Planifier et organiser le travail"
+          },
+          {
+            "id": "coordonner_des_equipes_ou_des_intervenants",
+            "libelle": "Coordonner des équipes ou des intervenants"
+          },
+          {
+            "id": "gerer_des_stocks_des_flux_des_approvisionnements",
+            "libelle": "Gérer des stocks, des flux, des approvisionnements"
+          },
+          {
+            "id": "traiter_des_dossiers_administratifs",
+            "libelle": "Traiter des dossiers administratifs"
+          },
+          {
+            "id": "gerer_un_budget_tenir_des_comptes",
+            "libelle": "Gérer un budget, tenir des comptes"
+          },
+          {
+            "id": "controler_la_qualite_la_securite_la_conformite",
+            "libelle": "Contrôler la qualité, la sécurité, la conformité"
+          },
+          {
+            "id": "organiser_des_evenements",
+            "libelle": "Organiser des événements"
+          }
+        ]
+      },
+      {
+        "id": "analyser",
+        "libelle": "Réfléchir et analyser",
+        "activites": [
+          {
+            "id": "analyser_des_donnees_et_des_chiffres",
+            "libelle": "Analyser des données et des chiffres"
+          },
+          {
+            "id": "rechercher_experimenter_tester",
+            "libelle": "Rechercher, expérimenter, tester"
+          },
+          {
+            "id": "diagnostiquer_et_resoudre_des_problemes",
+            "libelle": "Diagnostiquer et résoudre des problèmes"
+          },
+          {
+            "id": "programmer_developper_des_systemes_informatiques",
+            "libelle": "Programmer, développer des systèmes informatiques"
+          },
+          {
+            "id": "expertiser_conseiller_techniquement",
+            "libelle": "Expertiser, conseiller techniquement"
+          },
+          {
+            "id": "evaluer_des_risques_auditer",
+            "libelle": "Évaluer des risques, auditer"
+          },
+          {
+            "id": "interpreter_des_textes_et_des_regles",
+            "libelle": "Interpréter des textes et des règles"
+          }
+        ]
+      },
+      {
+        "id": "accompagner",
+        "libelle": "Accompagner et transmettre",
+        "activites": [
+          {
+            "id": "soigner_prendre_soin",
+            "libelle": "Soigner, prendre soin"
+          },
+          {
+            "id": "accompagner_et_aider_au_quotidien",
+            "libelle": "Accompagner et aider au quotidien"
+          },
+          {
+            "id": "ecouter_soutenir_conseiller_des_personnes",
+            "libelle": "Écouter, soutenir, conseiller des personnes"
+          },
+          {
+            "id": "enseigner_former",
+            "libelle": "Enseigner, former"
+          },
+          {
+            "id": "eduquer_animer_des_groupes",
+            "libelle": "Éduquer, animer des groupes"
+          },
+          {
+            "id": "orienter_inserer_accompagner_un_parcours",
+            "libelle": "Orienter, insérer, accompagner un parcours"
+          },
+          {
+            "id": "proteger_defendre_les_droits_des_personnes",
+            "libelle": "Protéger, défendre les droits des personnes"
+          }
+        ]
+      },
+      {
+        "id": "communiquer",
+        "libelle": "Communiquer et développer",
+        "activites": [
+          {
+            "id": "vendre_negocier",
+            "libelle": "Vendre, négocier"
+          },
+          {
+            "id": "accueillir_renseigner_le_public",
+            "libelle": "Accueillir, renseigner le public"
+          },
+          {
+            "id": "conseiller_des_clients",
+            "libelle": "Conseiller des clients"
+          },
+          {
+            "id": "promouvoir_faire_connaitre",
+            "libelle": "Promouvoir, faire connaître (marketing, communication)"
+          },
+          {
+            "id": "informer_presenter_raconter",
+            "libelle": "Informer, présenter, raconter (médias)"
+          },
+          {
+            "id": "developper_un_reseau_des_partenariats",
+            "libelle": "Développer un réseau, des partenariats"
+          },
+          {
+            "id": "traduire_interpreter_des_langues",
+            "libelle": "Traduire, interpréter des langues"
+          }
+        ]
+      },
+      {
+        "id": "diriger",
+        "libelle": "Diriger et entreprendre",
+        "activites": [
+          {
+            "id": "manager_une_equipe",
+            "libelle": "Manager une équipe"
+          },
+          {
+            "id": "piloter_des_projets",
+            "libelle": "Piloter des projets"
+          },
+          {
+            "id": "diriger_une_structure_ou_un_service",
+            "libelle": "Diriger une structure ou un service"
+          },
+          {
+            "id": "creer_developper_une_activite_ou_une_entreprise",
+            "libelle": "Créer, développer une activité ou une entreprise"
+          },
+          {
+            "id": "definir_une_strategie",
+            "libelle": "Définir une stratégie"
+          },
+          {
+            "id": "prendre_des_decisions_engageantes",
+            "libelle": "Prendre des décisions engageantes"
+          },
+          {
+            "id": "representer_porter_une_cause_ou_une_organisation",
+            "libelle": "Représenter, porter une cause ou une organisation"
+          }
+        ]
+      }
+    ]
+  },
+  "competences_categories": [
+    {
+      "id": "relationnelles_et_communication",
+      "libelle": "Relationnelles et communication",
+      "description": "Écouter, s'exprimer, travailler avec les autres, gérer les conflits"
+    },
+    {
+      "id": "organisation_et_rigueur",
+      "libelle": "Organisation et rigueur",
+      "description": "Planifier, prioriser, respecter des procédures et des délais"
+    },
+    {
+      "id": "analyse_et_resolution_de_problemes",
+      "libelle": "Analyse et résolution de problèmes",
+      "description": "Raisonner, diagnostiquer, synthétiser, prendre du recul"
+    },
+    {
+      "id": "techniques_et_manuelles",
+      "libelle": "Techniques et manuelles",
+      "description": "Gestes professionnels, outils, machines, savoir-faire pratique"
+    },
+    {
+      "id": "numeriques_et_informatiques",
+      "libelle": "Numériques et informatiques",
+      "description": "Utiliser, paramétrer ou développer des outils numériques"
+    },
+    {
+      "id": "creativite_et_innovation",
+      "libelle": "Créativité et innovation",
+      "description": "Imaginer, concevoir, proposer des idées nouvelles"
+    },
+    {
+      "id": "commerciales_et_negociation",
+      "libelle": "Commerciales et négociation",
+      "description": "Convaincre, vendre, négocier, fidéliser"
+    },
+    {
+      "id": "pedagogie_et_accompagnement",
+      "libelle": "Pédagogie et accompagnement",
+      "description": "Transmettre, former, soutenir une personne dans son parcours"
+    },
+    {
+      "id": "management_et_leadership",
+      "libelle": "Management et leadership",
+      "description": "Animer, motiver, décider, piloter une équipe"
+    },
+    {
+      "id": "expression_ecrite_et_langues",
+      "libelle": "Expression écrite et langues",
+      "description": "Rédiger, maîtriser l'orthographe, pratiquer des langues étrangères"
+    },
+    {
+      "id": "scientifiques_et_mathematiques",
+      "libelle": "Scientifiques et mathématiques",
+      "description": "Calcul, méthodes scientifiques, connaissances techniques approfondies"
+    },
+    {
+      "id": "physiques_et_sensorielles",
+      "libelle": "Physiques et sensorielles",
+      "description": "Endurance, dextérité, précision, coordination, perception (goût, vue, ouïe…)"
+    },
+    {
+      "id": "juridiques_reglementaires_et_securite",
+      "libelle": "Juridiques, réglementaires et sécurité",
+      "description": "Connaître et appliquer les lois, normes, règles d'hygiène et de sécurité"
+    }
+  ],
+  "centres_interet": [
+    {
+      "id": "nature_et_plein_air",
+      "libelle": "Nature et plein air"
+    },
+    {
+      "id": "animaux",
+      "libelle": "Animaux"
+    },
+    {
+      "id": "sciences_et_decouvertes",
+      "libelle": "Sciences et découvertes"
+    },
+    {
+      "id": "technologies_et_numerique",
+      "libelle": "Technologies et numérique"
+    },
+    {
+      "id": "mecanique_et_machines",
+      "libelle": "Mécanique et machines"
+    },
+    {
+      "id": "construction_et_bricolage",
+      "libelle": "Construction et bricolage"
+    },
+    {
+      "id": "art_dessin_et_creation",
+      "libelle": "Art, dessin et création"
+    },
+    {
+      "id": "musique_et_spectacle",
+      "libelle": "Musique et spectacle"
+    },
+    {
+      "id": "mode_et_beaute",
+      "libelle": "Mode et beauté"
+    },
+    {
+      "id": "cuisine_et_gastronomie",
+      "libelle": "Cuisine et gastronomie"
+    },
+    {
+      "id": "sport_et_activite_physique",
+      "libelle": "Sport et activité physique"
+    },
+    {
+      "id": "voyages_et_cultures_du_monde",
+      "libelle": "Voyages et cultures du monde"
+    },
+    {
+      "id": "langues_etrangeres",
+      "libelle": "Langues étrangères"
+    },
+    {
+      "id": "lecture_ecriture_et_histoire",
+      "libelle": "Lecture, écriture et histoire"
+    },
+    {
+      "id": "jeux_logique_et_strategie",
+      "libelle": "Jeux, logique et stratégie"
+    },
+    {
+      "id": "commerce_economie_et_argent",
+      "libelle": "Commerce, économie et argent"
+    },
+    {
+      "id": "droit_et_justice",
+      "libelle": "Droit et justice"
+    },
+    {
+      "id": "sante_et_corps_humain",
+      "libelle": "Santé et corps humain"
+    },
+    {
+      "id": "psychologie_et_relations_humaines",
+      "libelle": "Psychologie et relations humaines"
+    },
+    {
+      "id": "enfance_et_education",
+      "libelle": "Enfance et éducation"
+    },
+    {
+      "id": "societe_politique_et_actualite",
+      "libelle": "Société, politique et actualité"
+    },
+    {
+      "id": "environnement_et_ecologie",
+      "libelle": "Environnement et écologie"
+    },
+    {
+      "id": "vehicules_et_transports",
+      "libelle": "Véhicules et transports"
+    },
+    {
+      "id": "communication_medias_et_reseaux_sociaux",
+      "libelle": "Communication, médias et réseaux sociaux"
+    },
+    {
+      "id": "organisation_et_gestion",
+      "libelle": "Organisation et gestion"
+    },
+    {
+      "id": "aventure_et_sensations_fortes",
+      "libelle": "Aventure et sensations fortes"
+    }
+  ],
+  "sens_causes": [
+    {
+      "id": "proteger_l_environnement_et_le_climat",
+      "libelle": "Protéger l'environnement et le climat",
+      "description": "Préserver la planète, la biodiversité et les ressources"
+    },
+    {
+      "id": "prendre_soin_de_la_sante",
+      "libelle": "Prendre soin de la santé",
+      "description": "Soigner, prévenir, améliorer la santé physique et mentale"
+    },
+    {
+      "id": "aider_les_personnes_vulnerables",
+      "libelle": "Aider les personnes vulnérables",
+      "description": "Solidarité, lutte contre l'exclusion et la précarité"
+    },
+    {
+      "id": "transmettre_et_eduquer",
+      "libelle": "Transmettre et éduquer",
+      "description": "Faire grandir, former, donner des clés aux autres"
+    },
+    {
+      "id": "faire_progresser_la_connaissance",
+      "libelle": "Faire progresser la connaissance",
+      "description": "Recherche, science, compréhension du monde"
+    },
+    {
+      "id": "proteger_et_assurer_la_securite",
+      "libelle": "Protéger et assurer la sécurité",
+      "description": "Secourir, défendre, prévenir les risques"
+    },
+    {
+      "id": "defendre_la_justice_et_les_droits",
+      "libelle": "Défendre la justice et les droits",
+      "description": "Égalité, droit, citoyenneté, éthique"
+    },
+    {
+      "id": "nourrir_les_gens",
+      "libelle": "Nourrir les gens",
+      "description": "Produire, transformer et partager une alimentation de qualité"
+    },
+    {
+      "id": "faire_vivre_la_culture_et_la_beaute",
+      "libelle": "Faire vivre la culture et la beauté",
+      "description": "Créer, émouvoir, faire rêver, préserver le patrimoine"
+    },
+    {
+      "id": "construire_et_ameliorer_le_cadre_de_vie",
+      "libelle": "Construire et améliorer le cadre de vie",
+      "description": "Logement, villes, infrastructures, aménagement"
+    },
+    {
+      "id": "faire_fonctionner_les_services_essentiels",
+      "libelle": "Faire fonctionner les services essentiels",
+      "description": "Énergie, transport, eau, logistique, administration du quotidien"
+    },
+    {
+      "id": "innover_grace_a_la_technologie",
+      "libelle": "Innover grâce à la technologie",
+      "description": "Inventer les outils et usages de demain"
+    },
+    {
+      "id": "developper_l_economie_et_l_emploi_local",
+      "libelle": "Développer l'économie et l'emploi local",
+      "description": "Créer de l'activité, faire vivre un territoire"
+    },
+    {
+      "id": "creer_du_lien_entre_les_personnes",
+      "libelle": "Créer du lien entre les personnes",
+      "description": "Rassembler, faire se rencontrer, faire vivre une communauté"
+    },
+    {
+      "id": "preserver_les_savoir_faire_et_le_patrimoine",
+      "libelle": "Préserver les savoir-faire et le patrimoine",
+      "description": "Transmettre des techniques, restaurer, conserver"
+    },
+    {
+      "id": "apporter_du_bien_etre_et_du_plaisir",
+      "libelle": "Apporter du bien-être et du plaisir",
+      "description": "Détente, loisirs, beauté, moments agréables"
+    },
+    {
+      "id": "proteger_les_animaux",
+      "libelle": "Protéger les animaux",
+      "description": "Soigner, respecter et défendre le monde animal"
+    }
+  ],
+  "motivations": [
+    {
+      "id": "stabilite_et_securite_de_l_emploi",
+      "libelle": "Stabilité et sécurité de l'emploi"
+    },
+    {
+      "id": "bonne_remuneration",
+      "libelle": "Bonne rémunération"
+    },
+    {
+      "id": "reconnaissance_et_prestige",
+      "libelle": "Reconnaissance et prestige"
+    },
+    {
+      "id": "autonomie_et_liberte_d_organisation",
+      "libelle": "Autonomie et liberté d'organisation"
+    },
+    {
+      "id": "apprendre_en_continu",
+      "libelle": "Apprendre en continu"
+    },
+    {
+      "id": "variete_des_missions",
+      "libelle": "Variété des missions"
+    },
+    {
+      "id": "etre_utile_aux_autres",
+      "libelle": "Être utile aux autres"
+    },
+    {
+      "id": "exprimer_sa_creativite",
+      "libelle": "Exprimer sa créativité"
+    },
+    {
+      "id": "relever_des_defis",
+      "libelle": "Relever des défis"
+    },
+    {
+      "id": "evoluer_et_prendre_des_responsabilites",
+      "libelle": "Évoluer et prendre des responsabilités"
+    },
+    {
+      "id": "equilibre_vie_professionnelle_vie_personnelle",
+      "libelle": "Équilibre vie professionnelle / vie personnelle"
+    },
+    {
+      "id": "travailler_en_equipe",
+      "libelle": "Travailler en équipe"
+    },
+    {
+      "id": "contact_humain",
+      "libelle": "Contact humain"
+    },
+    {
+      "id": "voir_des_resultats_concrets",
+      "libelle": "Voir des résultats concrets"
+    },
+    {
+      "id": "bouger_voyager",
+      "libelle": "Bouger, voyager"
+    },
+    {
+      "id": "etre_son_propre_patron",
+      "libelle": "Être son propre patron"
+    },
+    {
+      "id": "action_et_adrenaline",
+      "libelle": "Action et adrénaline"
+    },
+    {
+      "id": "expertise_et_maitrise_d_un_sujet",
+      "libelle": "Expertise et maîtrise d'un sujet"
+    }
+  ],
+  "conditions_travail": {
+    "description": "Critères de conditions de travail. type 'echelle' : options ordonnées (positions d'un curseur, de la plus faible à la plus forte). type 'choix_multiple' : plusieurs valeurs possibles. Valeurs spéciales pour l'enrichissement : 'variable' (trop dépendant de l'employeur) et null (inconnu / non pertinent).",
+    "valeurs_speciales": [
+      {
+        "id": "variable",
+        "libelle": "Variable selon l'employeur ou le poste"
+      },
+      {
+        "id": null,
+        "libelle": "Information non disponible"
+      }
+    ],
+    "criteres": [
+      {
+        "id": "teletravail",
+        "libelle": "Télétravail",
+        "type": "echelle",
+        "question": "Peut-on travailler à distance ?",
+        "options": [
+          {
+            "id": "impossible",
+            "libelle": "Impossible"
+          },
+          {
+            "id": "ponctuel",
+            "libelle": "Ponctuel"
+          },
+          {
+            "id": "partiel",
+            "libelle": "Partiel (quelques jours par semaine)"
+          },
+          {
+            "id": "majoritaire",
+            "libelle": "Majoritaire ou total"
+          }
+        ]
+      },
+      {
+        "id": "ecran",
+        "libelle": "Travail sur écran",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "faible",
+            "libelle": "Peu d'écran"
+          },
+          {
+            "id": "modere",
+            "libelle": "Modéré"
+          },
+          {
+            "id": "important",
+            "libelle": "Majorité du temps sur écran"
+          }
+        ]
+      },
+      {
+        "id": "manuel",
+        "libelle": "Travail manuel",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "faible",
+            "libelle": "Peu manuel"
+          },
+          {
+            "id": "modere",
+            "libelle": "En partie manuel"
+          },
+          {
+            "id": "important",
+            "libelle": "Essentiellement manuel"
+          }
+        ]
+      },
+      {
+        "id": "bureau_terrain",
+        "libelle": "Bureau / terrain",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "bureau",
+            "libelle": "Au bureau"
+          },
+          {
+            "id": "mixte",
+            "libelle": "Mixte"
+          },
+          {
+            "id": "terrain",
+            "libelle": "Sur le terrain"
+          }
+        ]
+      },
+      {
+        "id": "interieur_exterieur",
+        "libelle": "Intérieur / extérieur",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "interieur",
+            "libelle": "En intérieur"
+          },
+          {
+            "id": "mixte",
+            "libelle": "Mixte"
+          },
+          {
+            "id": "exterieur",
+            "libelle": "En extérieur"
+          }
+        ]
+      },
+      {
+        "id": "relations_humaines",
+        "libelle": "Relations humaines",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "faibles",
+            "libelle": "Peu de contacts"
+          },
+          {
+            "id": "moderees",
+            "libelle": "Contacts réguliers"
+          },
+          {
+            "id": "intenses",
+            "libelle": "Contacts permanents (public, clients, patients…)"
+          }
+        ]
+      },
+      {
+        "id": "individuel_collectif",
+        "libelle": "Individuel / collectif",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "individuel",
+            "libelle": "Plutôt seul"
+          },
+          {
+            "id": "mixte",
+            "libelle": "Mixte"
+          },
+          {
+            "id": "collectif",
+            "libelle": "En équipe"
+          }
+        ]
+      },
+      {
+        "id": "autonomie",
+        "libelle": "Autonomie",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "faible",
+            "libelle": "Encadrée"
+          },
+          {
+            "id": "moyenne",
+            "libelle": "Moyenne"
+          },
+          {
+            "id": "elevee",
+            "libelle": "Grande autonomie"
+          }
+        ]
+      },
+      {
+        "id": "responsabilites",
+        "libelle": "Niveau de responsabilités",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "faibles",
+            "libelle": "Faibles"
+          },
+          {
+            "id": "moyennes",
+            "libelle": "Moyennes"
+          },
+          {
+            "id": "elevees",
+            "libelle": "Élevées (enjeux humains, financiers ou de sécurité)"
+          }
+        ]
+      },
+      {
+        "id": "management",
+        "libelle": "Management",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "aucun",
+            "libelle": "Pas d'encadrement"
+          },
+          {
+            "id": "coordination",
+            "libelle": "Coordination ponctuelle"
+          },
+          {
+            "id": "equipe",
+            "libelle": "Encadrement d'équipe"
+          }
+        ]
+      },
+      {
+        "id": "deplacements",
+        "libelle": "Déplacements",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "aucun",
+            "libelle": "Aucun"
+          },
+          {
+            "id": "occasionnels",
+            "libelle": "Occasionnels"
+          },
+          {
+            "id": "frequents",
+            "libelle": "Fréquents"
+          },
+          {
+            "id": "permanents",
+            "libelle": "Itinérance permanente"
+          }
+        ]
+      },
+      {
+        "id": "reunions",
+        "libelle": "Réunions",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "rares",
+            "libelle": "Rares"
+          },
+          {
+            "id": "regulieres",
+            "libelle": "Régulières"
+          },
+          {
+            "id": "frequentes",
+            "libelle": "Fréquentes"
+          }
+        ]
+      },
+      {
+        "id": "rythme",
+        "libelle": "Rythme de travail",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "regulier",
+            "libelle": "Régulier"
+          },
+          {
+            "id": "pics",
+            "libelle": "Avec des pics d'activité"
+          },
+          {
+            "id": "soutenu",
+            "libelle": "Soutenu / urgences"
+          }
+        ]
+      },
+      {
+        "id": "missions",
+        "libelle": "Nature des missions",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "repetitives",
+            "libelle": "Plutôt répétitives"
+          },
+          {
+            "id": "equilibrees",
+            "libelle": "Équilibrées"
+          },
+          {
+            "id": "variees",
+            "libelle": "Très variées"
+          }
+        ]
+      },
+      {
+        "id": "temps_travail",
+        "libelle": "Temps de travail",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "temps_partiel",
+            "libelle": "Temps partiel fréquent"
+          },
+          {
+            "id": "temps_plein",
+            "libelle": "Temps plein standard"
+          },
+          {
+            "id": "horaires_longs",
+            "libelle": "Horaires longs fréquents"
+          }
+        ]
+      },
+      {
+        "id": "horaires",
+        "libelle": "Horaires",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "reguliers",
+            "libelle": "Journée, horaires réguliers"
+          },
+          {
+            "id": "decales",
+            "libelle": "Horaires décalés"
+          },
+          {
+            "id": "nuit_weekend",
+            "libelle": "Nuit, week-end, astreintes"
+          }
+        ]
+      },
+      {
+        "id": "activite_physique",
+        "libelle": "Activité physique",
+        "type": "echelle",
+        "question": null,
+        "options": [
+          {
+            "id": "faible",
+            "libelle": "Faible"
+          },
+          {
+            "id": "moderee",
+            "libelle": "Modérée"
+          },
+          {
+            "id": "intense",
+            "libelle": "Intense (port de charges, station debout…)"
+          }
+        ]
+      },
+      {
+        "id": "cadre",
+        "libelle": "Cadre de travail",
+        "type": "choix_multiple",
+        "question": null,
+        "options": [
+          {
+            "id": "bureau",
+            "libelle": "Bureau"
+          },
+          {
+            "id": "atelier_usine",
+            "libelle": "Atelier, usine"
+          },
+          {
+            "id": "chantier",
+            "libelle": "Chantier"
+          },
+          {
+            "id": "commerce",
+            "libelle": "Commerce, boutique"
+          },
+          {
+            "id": "etablissement_sante_social",
+            "libelle": "Établissement de santé ou social"
+          },
+          {
+            "id": "etablissement_scolaire",
+            "libelle": "Établissement scolaire ou de formation"
+          },
+          {
+            "id": "domicile_client",
+            "libelle": "Domicile des personnes / chez le client"
+          },
+          {
+            "id": "nature",
+            "libelle": "En pleine nature"
+          },
+          {
+            "id": "vehicule",
+            "libelle": "Véhicule"
+          },
+          {
+            "id": "salle_spectacle_studio",
+            "libelle": "Salle de spectacle, studio"
+          },
+          {
+            "id": "cuisine_salle",
+            "libelle": "Cuisine, salle de restaurant"
+          },
+          {
+            "id": "laboratoire",
+            "libelle": "Laboratoire"
+          }
+        ]
+      },
+      {
+        "id": "statut",
+        "libelle": "Statut",
+        "type": "choix_multiple",
+        "question": null,
+        "options": [
+          {
+            "id": "salarie_prive",
+            "libelle": "Salarié du privé"
+          },
+          {
+            "id": "fonction_publique",
+            "libelle": "Fonction publique"
+          },
+          {
+            "id": "independant",
+            "libelle": "Indépendant / libéral"
+          },
+          {
+            "id": "intermittent",
+            "libelle": "Intermittent / contrats courts"
+          },
+          {
+            "id": "associatif",
+            "libelle": "Secteur associatif"
+          }
+        ]
+      },
+      {
+        "id": "taille_structure",
+        "libelle": "Taille de structure",
+        "type": "choix_multiple",
+        "question": null,
+        "options": [
+          {
+            "id": "tpe",
+            "libelle": "Très petite entreprise (< 10)"
+          },
+          {
+            "id": "pme",
+            "libelle": "PME (10 à 249)"
+          },
+          {
+            "id": "grande_entreprise",
+            "libelle": "Grande entreprise"
+          },
+          {
+            "id": "administration",
+            "libelle": "Administration / grande institution"
+          }
+        ]
+      }
+    ]
+  }
+}
