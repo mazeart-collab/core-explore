@@ -45,7 +45,7 @@ export async function jeton({ id, secret }) {
   if (!r.ok) {
     const detail = (await r.text().catch(() => '')).slice(0, 300)
     const aide = /invalid_client/.test(detail)
-      ? ` Identifiant ou clé secrète incorrects (identifiant : ${id.length} caractères, ${id.startsWith("PAR_") ? "commence bien" : "ne commence pas"} par « PAR_ » ; ` +
+      ? ` Identifiant ou clé secrète incorrects, ou API « Marché du travail » non ajoutée à l’application francetravail.io (identifiant : ${id.length} caractères, ${id.startsWith("PAR_") ? "commence bien" : "ne commence pas"} par « PAR_ » ; ` +
         `clé secrète : ${secret.length} caractères).`
       : ''
     throw new Error(`Authentification France Travail refusée (HTTP ${r.status}). ${detail}${aide}`)

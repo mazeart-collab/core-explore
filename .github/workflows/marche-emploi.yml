@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       limite:
-        description: "Nombre de métiers à interroger (vide = tous, environ 15 minutes). Ex. 20 pour un essai rapide."
+        description: "Nombre de métiers à interroger (vide = tous, environ 2 minutes). Ex. 20 pour un essai rapide."
         type: string
         default: ""
       codes:
