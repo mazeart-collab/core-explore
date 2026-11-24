@@ -381,7 +381,10 @@ function readVersion(files) {
   const name = [...files.keys()].find((n) => /version.*\.txt$/i.test(n))
   if (!name) return null
   const text = decode(files.get(name)).trim()
-  return text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).join(' | ') || null
+  // On garde l'en-tête (numéro, dates, titre) et pas la longue description.
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+  const header = lines.filter((l) => !/^description\b/i.test(l)).slice(0, 4)
+  return header.join(' | ') || null
 }
 
 // ---------------------------------------------------------------------------
