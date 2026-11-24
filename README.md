@@ -2,13 +2,30 @@
 
 Application web d'exploration des métiers (React + Vite + Tailwind CSS), construite sur le référentiel officiel **ROME 4.0 de France Travail** (Open Data).
 
-Les écrans ne sont pas encore construits : ce dépôt contient la structure du projet, les référentiels et le pipeline de construction de la base métiers.
+## Pages (V1)
+
+| URL | Page |
+| --- | --- |
+| `/` | Accueil |
+| `/univers` | L'univers des possibles : univers par familles, recherche tolérante aux fautes |
+| `/metier/:code_rome` | Fiche métier (données officielles ROME et repères enrichis séparés) |
+| `/ce-qui-m-anime` | Je trouve ce qui m'anime : critères, recherche en langage naturel, résultats, « Surprenez-moi » |
+| `/a-propos` | À propos et sources |
+
+La fonction serveur `api/parse-intent.js` (Vercel) traduit une phrase libre en critères avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`).
+
+## Déploiement sur Vercel
+
+1. Sur vercel.com : **Add New… > Project**, importez le dépôt GitHub `core-explore`. Les réglages sont lus dans `vercel.json` (Vite, sortie `dist`) : rien à modifier.
+2. Avant ou après le premier déploiement : **Settings > Environment Variables**, ajoutez `ANTHROPIC_API_KEY` (cochez Production et Preview), puis **Deployments > ⋯ > Redeploy** pour la prendre en compte.
+
+Sans clé, le site fonctionne entièrement ; seul le bouton « Traduire en critères » affiche un message indiquant que la fonction n'est pas disponible.
 
 ## Démarrage
 
 ```bash
 npm install
-npm run dev        # application (écran provisoire)
+npm run dev        # application (la fonction /api n'est disponible qu'avec `vercel dev` ou une fois déployée)
 ```
 
 Node.js 20.12 ou plus récent.
