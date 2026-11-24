@@ -60,6 +60,15 @@ Le script associe chaque métier aux taxonomies (`secteurs`, `activites`, `compe
 
 Autres options : `--dry-run` (affiche les prompts sans appel API), `--concurrency=4`, `--build-only` (régénère `metiers.json` depuis la progression).
 
+### Lancer le pipeline depuis GitHub (sans terminal)
+
+Deux workflows manuels sont disponibles dans l'onglet **Actions** du dépôt :
+
+1. **« 1. Importer ROME 4.0 »** : génère `data/rome_base.json` et le committe sur la branche choisie.
+2. **« 2. Enrichir les métiers »** : paramètre `limit` (`20` par défaut ; vide ou `all` pour tous les métiers restants). Committe `public/data/metiers.json` et `data/.enrich-progress.jsonl`, même si le run échoue ou est annulé, pour que le run suivant reprenne sans repayer.
+
+Prérequis pour le workflow 2 : ajouter la clé API dans **Settings > Secrets and variables > Actions > New repository secret**, nom `ANTHROPIC_API_KEY`.
+
 ## Sources et licence des données
 
 ROME 4.0, France Travail, publié sous Licence Ouverte / Open Licence (Etalab). Fiches consultables sur [Métierscope](https://candidat.francetravail.fr/metierscope/).

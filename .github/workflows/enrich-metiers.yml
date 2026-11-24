@@ -1,0 +1,83 @@
+name: "2. Enrichir les métiers"
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Nombre de métiers à traiter (vide ou « all » = tous les restants)"
+        type: string
+        default: "20"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifier les prérequis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Secret ANTHROPIC_API_KEY absent : ajoutez-le dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          if [ ! -f data/rome_base.json ]; then
+            echo "::error::data/rome_base.json introuvable : lancez d'abord le workflow « 1. Importer ROME 4.0 »."
+            exit 1
+          fi
+
+      - name: Enrichir les métiers
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          LIMIT="$(echo "$LIMIT" | tr -d '[:space:]')"
+          if [ -z "$LIMIT" ] || [ "$LIMIT" = "all" ]; then
+            npm run data:enrich
+          elif [[ "$LIMIT" =~ ^[0-9]+$ ]]; then
+            npm run data:enrich -- --limit="$LIMIT"
+          else
+            echo "::error::limit doit être un nombre, vide ou « all » (reçu : $LIMIT)."
+            exit 1
+          fi
+
+      # Exécuté même en cas d'échec ou d'annulation, pour ne pas perdre (ni repayer) les métiers déjà traités.
+      - name: Enregistrer metiers.json et la progression
+        if: always()
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f data/.enrich-progress.jsonl ] && [ ! -f public/data/metiers.json ]; then
+            npm run data:enrich -- --build-only
+          fi
+          [ -f public/data/metiers.json ] && git add public/data/metiers.json
+          # Le fichier de progression est ignoré par .gitignore en local : on le force ici pour la reprise.
+          [ -f data/.enrich-progress.jsonl ] && git add -f data/.enrich-progress.jsonl
+          if git diff --cached --quiet; then
+            echo "Aucun changement à enregistrer."
+            exit 0
+          fi
+          git commit -m "Données : enrichissement des métiers ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"

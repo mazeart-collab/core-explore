@@ -1,0 +1,46 @@
+name: "1. Importer ROME 4.0"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Importer le ROME 4.0
+        run: npm run data:import
+
+      - name: Enregistrer data/rome_base.json
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/rome_base.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement dans data/rome_base.json."
+            exit 0
+          fi
+          git commit -m "Données : import ROME 4.0 ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
