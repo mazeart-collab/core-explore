@@ -1,0 +1,62 @@
+name: "3. Mettre à jour le marché de l'emploi"
+
+on:
+  workflow_dispatch:
+    inputs:
+      correspondance:
+        description: "Table de correspondance métier BMO / FAP → code ROME (URL d'un CSV ou xlsx). Vide = data/correspondances/bmo_rome.csv"
+        type: string
+        default: ""
+      bmo:
+        description: "Fichier BMO (URL xlsx). Vide = le plus récent sur data.gouv.fr / francetravail.org"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  marche:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Ajouter les indicateurs du marché de l'emploi
+        env:
+          CORRESPONDANCE_URL: ${{ inputs.correspondance }}
+          BMO_URL: ${{ inputs.bmo }}
+        run: |
+          ARGS=()
+          [ -n "$CORRESPONDANCE_URL" ] && ARGS+=("--correspondance=$CORRESPONDANCE_URL")
+          [ -n "$BMO_URL" ] && ARGS+=("--bmo=$BMO_URL")
+          npm run data:marche -- "${ARGS[@]}"
+
+      - name: Enregistrer metiers.json
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/metiers.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement à enregistrer."
+            exit 0
+          fi
+          git commit -m "Données : marché de l'emploi BMO ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"

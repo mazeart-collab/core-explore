@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "data:import": "node scripts/import-rome.js",
     "data:import:sample": "node scripts/import-rome.js --from=scripts/fixtures/rome-sample --out=data/rome_base.sample.json",
-    "data:enrich": "node scripts/enrich-metiers.js"
+    "data:enrich": "node scripts/enrich-metiers.js",
+    "data:marche": "node scripts/enrichir-marche.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.13.0",
@@ -29,6 +30,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "adm-zip": "^0.6.1",
     "csv-parse": "^7.0.3",
+    "exceljs": "^4.4.0",
     "oxlint": "^1.90.0",
     "tailwindcss": "^4.3.5",
     "vite": "^8.3.6"

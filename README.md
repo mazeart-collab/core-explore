@@ -84,6 +84,8 @@ Deux workflows manuels sont disponibles dans l'onglet **Actions** du dépôt :
 1. **« 1. Importer ROME 4.0 »** : génère `data/rome_base.json` et le committe sur la branche choisie.
 2. **« 2. Enrichir les métiers »** : paramètre `limit` (`20` par défaut ; vide ou `all` pour tous les métiers restants). Committe `public/data/metiers.json` et `data/.enrich-progress.jsonl`, même si le run échoue ou est annulé, pour que le run suivant reprenne sans repayer.
 
+3. **« 3. Mettre à jour le marché de l'emploi »** : ajoute à chaque métier un bloc `marche_emploi` (niveau de tension, projets de recrutement, part des recrutements difficiles, source et année) à partir de l'enquête BMO de France Travail (Open Data, sans IA). Nécessite la table de correspondance `data/correspondances/bmo_rome.csv` (ou son URL dans le champ « correspondance ») : voir `data/correspondances/README.md`. Test hors ligne : `node scripts/fixtures/marche-sample/make.mjs` puis `npm run data:marche -- --bmo=scripts/fixtures/marche-sample/bmo-sample.xlsx --correspondance=scripts/fixtures/marche-sample/bmo_rome.csv --out=/tmp/metiers.json`.
+
 Prérequis pour le workflow 2 : ajouter la clé API dans **Settings > Secrets and variables > Actions > New repository secret**, nom `ANTHROPIC_API_KEY`.
 
 ## Sources et licence des données

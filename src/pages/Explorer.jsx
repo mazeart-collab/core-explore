@@ -8,6 +8,7 @@ import { DataGate, PageTitle, buttonPrimary, buttonSecondary } from '../componen
 import { Link } from 'react-router'
 import { useMetiers } from '../lib/MetiersContext'
 import { useSelection } from '../lib/SelectionContext'
+import { tensionRang } from '../lib/marche'
 import {
   EMPTY_CRITERIA,
   NIVEAUX,
@@ -195,12 +196,17 @@ function ExplorerContent() {
   const actifs = useMemo(() => metiers.filter((m) => !ecartes[m.code_rome]), [metiers, ecartes])
   const nbEcartes = metiers.length - actifs.length
   const { results, hiddenCount } = useMemo(() => rank(actifs, criteria), [actifs, criteria])
+  // « Privilégier les métiers qui recrutent » : à étoiles égales, les métiers en tension passent devant.
+  const [recrutent, setRecrutent] = useStoredState('core-explore:privilegier-recrutement', false, Boolean)
+  const hasMarche = useMemo(() => metiers.some((m) => m.marche_emploi && m.marche_emploi.niveau_tension !== 'inconnue'), [metiers])
   const groups = useMemo(
     () =>
-      NIVEAUX.map((niveau) => ({ niveau, results: results.filter((r) => r.stars === niveau.etoiles) })).filter(
-        (g) => g.results.length,
-      ),
-    [results],
+      NIVEAUX.map((niveau) => {
+        let list = results.filter((r) => r.stars === niveau.etoiles)
+        if (recrutent && hasMarche) list = [...list].sort((a, b) => tensionRang(a.metier) - tensionRang(b.metier) || b.rate - a.rate)
+        return { niveau, results: list }
+      }).filter((g) => g.results.length),
+    [results, recrutent, hasMarche],
   )
 
   const pilierTags = useMemo(() => ikigaiTags(criteria), [criteria])
@@ -279,6 +285,26 @@ function ExplorerContent() {
               Surprenez-moi
             </button>
           </div>
+
+          <label
+            className={`flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm ${hasMarche ? 'text-slate-700' : 'text-slate-400'}`}
+          >
+            <input
+              type="checkbox"
+              checked={recrutent && hasMarche}
+              disabled={!hasMarche}
+              onChange={(e) => setRecrutent(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-teal-700"
+            />
+            <span>
+              Privilégier les métiers qui recrutent
+              <span className="block text-xs text-slate-500">
+                {hasMarche
+                  ? 'À étoiles égales, les métiers en tension (source France Travail, enquête BMO) passent en premier.'
+                  : 'Disponible dès que les indicateurs du marché de l’emploi auront été importés.'}
+              </span>
+            </span>
+          </label>
 
           {surprises && (
             <section className="rounded-xl border border-dashed border-teal-300 bg-white p-4">
