@@ -39,12 +39,32 @@ function toDoc(m) {
 
 const tokenize = (text) => normalize(text).split(/[^a-z0-9]+/).filter((w) => w.length >= 2)
 
-/** Prépare un index de recherche ; renvoie une fonction query → liste de métiers (ou null si requête vide). */
-export function createSearch(metiers) {
+const cache = new WeakMap()
+
+/**
+ * Index de recherche construit une seule fois par jeu de données (mis en cache) ;
+ * renvoie une fonction query → liste de métiers (ou null si requête vide).
+ */
+export function getSearch(metiers) {
+  if (!cache.has(metiers)) cache.set(metiers, createSearch(metiers))
+  return cache.get(metiers)
+}
+
+function createSearch(metiers) {
   const docs = metiers.map(toDoc)
-  const vocabulary = new Set()
-  for (const d of docs) for (const [field] of FIELDS) for (const w of tokenize(d[field])) if (w.length >= 3) vocabulary.add(w)
-  const fuzzy = new Fuse([...vocabulary], { includeScore: true, threshold: 0.25 })
+  // Vocabulaire : mot → (métier → poids du meilleur champ), pour la recherche approchée.
+  const vocabulary = new Map()
+  docs.forEach((d, i) => {
+    for (const [field, weight] of FIELDS) {
+      for (const w of tokenize(d[field])) {
+        if (w.length < 3) continue
+        let entry = vocabulary.get(w)
+        if (!entry) vocabulary.set(w, (entry = new Map()))
+        if ((entry.get(i) || 0) < weight * 2) entry.set(i, weight * 2)
+      }
+    }
+  })
+  const fuzzy = new Fuse([...vocabulary.keys()], { includeScore: true, threshold: 0.25 })
 
   // Poids du meilleur champ contenant le texte, 0 sinon. Un début de mot compte double.
   const fieldScore = (doc, text) => {
@@ -75,9 +95,11 @@ export function createSearch(metiers) {
           .search(word, { limit: 8 })
           .map((r) => r.item)
           .filter((n) => Math.abs(n.length - word.length) <= 2 && n[0] === word[0])
-        for (const i of alive) {
-          const s = Math.max(0, ...near.map((n) => fieldScore(docs[i], n)))
-          if (s) hits.set(i, s / 2)
+        const isAlive = new Set(alive)
+        for (const n of near) {
+          for (const [i, s] of vocabulary.get(n)) {
+            if (isAlive.has(i) && (hits.get(i) || 0) < s / 2) hits.set(i, s / 2)
+          }
         }
       }
       alive = alive.filter((i) => hits.has(i))

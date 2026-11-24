@@ -1,9 +1,9 @@
-import { useDeferredValue, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import MetierCard from '../components/MetierCard'
-import { DataGate, PageTitle } from '../components/ui'
+import { DataGate, PageTitle, buttonSecondary } from '../components/ui'
 import { useMetiers } from '../lib/MetiersContext'
-import { createSearch } from '../lib/search'
+import { getSearch } from '../lib/search'
 import { FAMILLES, UNIVERS } from '../lib/taxonomies'
 
 function SearchBar({ value, onChange }) {
@@ -31,13 +31,27 @@ function SearchBar({ value, onChange }) {
   )
 }
 
+const PAGE_SIZE = 30
+const DEBOUNCE_MS = 250
+
+/** Grille de métiers affichée par pages de 30 (remise à zéro quand la liste change : voir la prop key). */
 function MetierGrid({ metiers }) {
+  const [visible, setVisible] = useState(PAGE_SIZE)
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {metiers.map((m) => (
-        <MetierCard key={m.code_rome} metier={m} />
-      ))}
-    </div>
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {metiers.slice(0, visible).map((m) => (
+          <MetierCard key={m.code_rome} metier={m} />
+        ))}
+      </div>
+      {metiers.length > visible && (
+        <div className="mt-6 text-center">
+          <button type="button" className={buttonSecondary} onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+            Afficher plus ({metiers.length - visible} restant{metiers.length - visible > 1 ? 's' : ''})
+          </button>
+        </div>
+      )}
+    </>
   )
 }
 
@@ -108,23 +122,34 @@ function CatalogueContent() {
   const [params, setParams] = useSearchParams()
   const query = params.get('q') || ''
   const universId = params.get('univers')
-  const deferredQuery = useDeferredValue(query)
+  // Valeur affichée dans le champ, mise à jour immédiatement à chaque frappe.
+  const [inputValue, setInputValue] = useState(query)
+  // La recherche (et l'URL) ne suivent qu'après 250 ms sans frappe.
+  useEffect(() => {
+    if (inputValue === query) return
+    const id = setTimeout(() => {
+      const next = new URLSearchParams(params)
+      if (inputValue) next.set('q', inputValue)
+      else next.delete('q')
+      setParams(next, { replace: true })
+    }, DEBOUNCE_MS)
+    return () => clearTimeout(id)
+  }, [inputValue, query, params, setParams])
+  // Navigation (retour arrière, lien) : le champ reprend la valeur de l'URL.
+  const [lastQuery, setLastQuery] = useState(query)
+  if (query !== lastQuery) {
+    setLastQuery(query)
+    if (query !== inputValue) setInputValue(query)
+  }
 
-  const search = useMemo(() => createSearch(metiers), [metiers])
+  const search = useMemo(() => getSearch(metiers), [metiers])
   const counts = useMemo(() => {
     const c = {}
     for (const m of metiers) for (const id of m.enrichi_ia?.secteurs || []) c[id] = (c[id] || 0) + 1
     return c
   }, [metiers])
 
-  const setQuery = (q) => {
-    const next = new URLSearchParams(params)
-    if (q) next.set('q', q)
-    else next.delete('q')
-    setParams(next, { replace: true })
-  }
-
-  const results = useMemo(() => search(deferredQuery), [search, deferredQuery])
+  const results = useMemo(() => search(query), [search, query])
   const sortByName = (list) => [...list].sort((a, b) => a.intitule.localeCompare(b.intitule, 'fr'))
 
   let body
@@ -133,15 +158,15 @@ function CatalogueContent() {
       <section aria-live="polite">
         <h2 className="mb-4 text-lg font-semibold text-slate-900">
           {results.length
-            ? `${results.length} métier${results.length > 1 ? 's' : ''} pour « ${deferredQuery.trim()} »`
-            : `Aucun métier trouvé pour « ${deferredQuery.trim()} »`}
+            ? `${results.length} métier${results.length > 1 ? 's' : ''} pour « ${query.trim()} »`
+            : `Aucun métier trouvé pour « ${query.trim()} »`}
         </h2>
         {!results.length && (
           <p className="text-sm text-slate-600">
             Essayez un autre mot, plus général, ou parcourez les univers ci-dessous en effaçant la recherche.
           </p>
         )}
-        <MetierGrid metiers={results} />
+        <MetierGrid key={query} metiers={results} />
       </section>
     )
   } else if (universId && UNIVERS[universId]) {
@@ -158,7 +183,7 @@ function CatalogueContent() {
           </span>
         </h2>
         {list.length ? (
-          <MetierGrid metiers={list} />
+          <MetierGrid key={universId} metiers={list} />
         ) : (
           <p className="text-sm text-slate-600">Aucun métier n’est encore rattaché à cet univers.</p>
         )}
@@ -170,7 +195,7 @@ function CatalogueContent() {
 
   return (
     <>
-      <SearchBar value={query} onChange={setQuery} />
+      <SearchBar value={inputValue} onChange={setInputValue} />
       {body}
     </>
   )
