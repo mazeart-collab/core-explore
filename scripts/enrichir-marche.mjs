@@ -28,8 +28,8 @@ const LIMITE = Number(args.limite || process.env.LIMITE) || 0
 const CODES = String(args.codes || process.env.CODES || '')
   .split(/[\s,;]+/)
   .filter(Boolean)
-// Trois appels par métier ; l'application France Travail accepte 100 appels par seconde (marge gardée).
-const METIERS_PAR_SECONDE = Number(args.rythme) || 25
+// Trois appels par métier ; l'API accepte 10 appels par seconde.
+const METIERS_PAR_SECONDE = Number(args.rythme) || 3
 
 const log = (...a) => console.log(...a)
 const fail = (msg) => {
