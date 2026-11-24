@@ -1,10 +1,21 @@
 import { useCallback, useMemo, useState } from 'react'
 import CriteriaForm from '../components/CriteriaForm'
+import Guide from '../components/Guide'
 import IntentBox from '../components/IntentBox'
 import MetierCard from '../components/MetierCard'
+import { IkigaiBadges, IkigaiDiagram, Stars } from '../components/ikigai'
 import { DataGate, PageTitle, buttonPrimary, buttonSecondary } from '../components/ui'
 import { useMetiers } from '../lib/MetiersContext'
-import { EMPTY_CRITERIA, countCriteria, normalizeCriteria, rank, surprise } from '../lib/matching'
+import {
+  EMPTY_CRITERIA,
+  NIVEAUX,
+  PILIERS,
+  activePiliers,
+  countCriteria,
+  normalizeCriteria,
+  rank,
+  surprise,
+} from '../lib/matching'
 import { clean } from '../lib/text'
 import { useStoredState } from '../lib/useStoredState'
 
@@ -67,22 +78,126 @@ function ReasonBlocks({ reasons, gaps, vigilance }) {
   )
 }
 
+
 function ResultCard({ result }) {
+  const aside = (
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      {result.stars >= 2 ? <Stars count={result.stars} /> : <span className="text-xs text-slate-500">Piste inattendue</span>}
+      <IkigaiBadges piliers={result.piliers} />
+    </div>
+  )
   return (
-    <MetierCard metier={result.metier}>
+    <MetierCard metier={result.metier} aside={aside}>
       <ReasonBlocks reasons={result.reasons} gaps={result.gaps} vigilance={result.metier.enrichi_ia?.points_vigilance} />
     </MetierCard>
   )
 }
 
+function Chevron({ open }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className={`ml-auto shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  )
+}
+
+/** Section repliable d'un niveau d'étoiles, affichée par pages. */
+function StarGroup({ niveau, results, open, onToggle }) {
+  const [visible, setVisible] = useState(PAGE_SIZE)
+  const id = `groupe-${niveau.etoiles}`
+  const rest = results.length - visible
+  return (
+    <section className="rounded-xl border border-slate-200 bg-slate-100/50">
+      <h3>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={onToggle}
+          className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-left"
+        >
+          <Stars count={niveau.etoiles} />
+          <span className="font-semibold text-slate-900">
+            Métiers {niveau.etoiles} étoiles ({results.length})
+          </span>
+          <span className="text-sm text-slate-500">{niveau.libelle}</span>
+          <Chevron open={open} />
+        </button>
+      </h3>
+      {open && (
+        <div id={id} className="px-3 pb-3 sm:px-4 sm:pb-4">
+          <div className="grid gap-4 2xl:grid-cols-2">
+            {results.slice(0, visible).map((r) => (
+              <ResultCard key={r.metier.code_rome} result={r} />
+            ))}
+          </div>
+          {rest > 0 && (
+            <div className="mt-4 text-center">
+              <button type="button" className={buttonSecondary} onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                Afficher plus ({rest} restant{rest > 1 ? 's' : ''})
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  )
+}
+
+const plural = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`
+
 function ExplorerContent() {
   const { metiers } = useMetiers()
   const [criteria, setCriteria] = useStoredState(STORAGE_KEY, EMPTY_CRITERIA, normalizeCriteria)
-  const [visible, setVisible] = useState(PAGE_SIZE)
   const [surprises, setSurprises] = useState(null)
+  const [openPanel, setOpenPanel] = useState('activites')
+  // Groupes d'étoiles repliés par l'utilisateur (le groupe 2 étoiles l'est par défaut).
+  const [closedGroups, setClosedGroups] = useState(() => new Set([2]))
 
   const nbCriteria = countCriteria(criteria)
-  const { results, excludedCount } = useMemo(() => rank(metiers, criteria), [metiers, criteria])
+  const { results, excludedCount, hiddenCount } = useMemo(() => rank(metiers, criteria), [metiers, criteria])
+  const groups = useMemo(
+    () =>
+      NIVEAUX.map((niveau) => ({ niveau, results: results.filter((r) => r.stars === niveau.etoiles) })).filter(
+        (g) => g.results.length,
+      ),
+    [results],
+  )
+
+  const piliers = activePiliers(criteria)
+  const pilierCounts = {
+    aime: criteria.activites.length + criteria.centres_interet.length,
+    talents: Object.keys(criteria.competences).length,
+    sens: criteria.sens_causes.length,
+    equilibre: criteria.motivations.length + Object.values(criteria.conditions).filter((p) => p?.valeurs?.length).length,
+  }
+
+  // Clic sur un cercle de l'Ikigai : ouvre la section correspondante et la fait défiler à l'écran.
+  const selectPilier = (id) => {
+    const pilier = PILIERS.find((p) => p.id === id)
+    const panelId = pilier.panels.includes(openPanel) ? openPanel : pilier.panels[0]
+    setOpenPanel(panelId)
+    setTimeout(() => {
+      document.getElementById(`criteres-${panelId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+
+  const toggleGroup = (etoiles) =>
+    setClosedGroups((s) => {
+      const next = new Set(s)
+      if (next.has(etoiles)) next.delete(etoiles)
+      else next.add(etoiles)
+      return next
+    })
 
   const applyIntent = useCallback(
     (incoming) => {
@@ -96,15 +211,18 @@ function ExplorerContent() {
   const reset = () => {
     setCriteria(EMPTY_CRITERIA)
     setSurprises(null)
-    setVisible(PAGE_SIZE)
   }
 
   return (
     <div className="space-y-6">
+      <Guide />
       <IntentBox onCriteria={applyIntent} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         <div>
+          <div className="mb-4">
+            <IkigaiDiagram active={piliers} counts={pilierCounts} onSelect={selectPilier} />
+          </div>
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-slate-900">Mes critères</h2>
             <button
@@ -119,7 +237,7 @@ function ExplorerContent() {
           <p className="mb-3 text-xs text-slate-500">
             Aucun champ n’est obligatoire. Vos choix sont enregistrés automatiquement sur cet appareil.
           </p>
-          <CriteriaForm criteria={criteria} setCriteria={setCriteria} />
+          <CriteriaForm criteria={criteria} setCriteria={setCriteria} openPanel={openPanel} setOpenPanel={setOpenPanel} />
         </div>
 
         <div className="space-y-4" aria-live="polite">
@@ -127,7 +245,7 @@ function ExplorerContent() {
             <h2 className="text-lg font-semibold text-slate-900">
               {nbCriteria
                 ? results.length
-                  ? `${results.length} métier${results.length > 1 ? 's' : ''} à découvrir`
+                  ? `${plural(results.length, 'métier')} à découvrir`
                   : 'Aucun métier ne correspond encore'
                 : 'Des métiers à découvrir'}
             </h2>
@@ -169,16 +287,8 @@ function ExplorerContent() {
 
           {!nbCriteria && (
             <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
-              Choisissez quelques critères à gauche (ou décrivez votre métier idéal ci-dessus) : les métiers
-              apparaîtront ici au fur et à mesure, avec ce qui les relie à vos choix. Vous pouvez aussi vous laisser
-              surprendre.
-            </p>
-          )}
-
-          {nbCriteria > 0 && excludedCount > 0 && (
-            <p className="text-xs text-slate-500">
-              {excludedCount} métier{excludedCount > 1 ? 's' : ''} écarté{excludedCount > 1 ? 's' : ''} par vos
-              critères « Indispensable » ou « À éviter ».
+              Choisissez quelques critères (ou décrivez votre métier idéal ci-dessus) : les métiers apparaîtront ici,
+              classés par étoiles, avec ce qui les relie à vos choix. Vous pouvez aussi vous laisser surprendre.
             </p>
           )}
 
@@ -189,17 +299,23 @@ function ExplorerContent() {
             </p>
           )}
 
-          <div className="grid gap-4 2xl:grid-cols-2">
-            {results.slice(0, visible).map((r) => (
-              <ResultCard key={r.metier.code_rome} result={r} />
-            ))}
-          </div>
-          {results.length > visible && (
-            <div className="text-center">
-              <button type="button" className={buttonSecondary} onClick={() => setVisible((v) => v + PAGE_SIZE)}>
-                Afficher plus de métiers
-              </button>
-            </div>
+          {groups.map((g) => (
+            <StarGroup
+              key={g.niveau.etoiles}
+              niveau={g.niveau}
+              results={g.results}
+              open={!closedGroups.has(g.niveau.etoiles)}
+              onToggle={() => toggleGroup(g.niveau.etoiles)}
+            />
+          ))}
+
+          {nbCriteria > 0 && (excludedCount > 0 || hiddenCount > 0) && (
+            <p className="text-xs text-slate-500">
+              {excludedCount > 0 &&
+                `${plural(excludedCount, 'métier')} écarté${excludedCount > 1 ? 's' : ''} par vos critères « Indispensable ». `}
+              {hiddenCount > 0 &&
+                `${plural(hiddenCount, 'autre métier')} partage${hiddenCount > 1 ? 'nt' : ''} un point commun avec vos choix, sans être assez proche${hiddenCount > 1 ? 's' : ''} pour être affiché${hiddenCount > 1 ? 's' : ''}.`}
+            </p>
           )}
         </div>
       </div>
