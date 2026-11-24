@@ -5,17 +5,19 @@ import IntentBox from '../components/IntentBox'
 import MetierCard from '../components/MetierCard'
 import { IkigaiBadges, IkigaiDiagram, Stars } from '../components/ikigai'
 import { DataGate, PageTitle, buttonPrimary, buttonSecondary } from '../components/ui'
+import { Link } from 'react-router'
 import { useMetiers } from '../lib/MetiersContext'
+import { useSelection } from '../lib/SelectionContext'
 import {
   EMPTY_CRITERIA,
   NIVEAUX,
   PILIERS,
-  activePiliers,
   countCriteria,
   normalizeCriteria,
   rank,
   surprise,
 } from '../lib/matching'
+import { ACTIVITES, CENTRES_INTERET, COMPETENCES, CRITERES_BY_ID, MOTIVATIONS, SENS, conditionLabel, label } from '../lib/taxonomies'
 import { clean } from '../lib/text'
 import { useStoredState } from '../lib/useStoredState'
 
@@ -153,6 +155,30 @@ function StarGroup({ niveau, results, open, onToggle }) {
   )
 }
 
+/** Mots-clés choisis, regroupés par pilier de l'Ikigai (pour l'encart « Votre Ikigai »). */
+function ikigaiTags(c) {
+  const ETAT = { utiliser: '', developper: 'À développer : ', ne_plus: '' }
+  return {
+    aime: [...c.activites.map((id) => label(ACTIVITES, id)), ...c.centres_interet.map((id) => label(CENTRES_INTERET, id))].map(
+      (l) => ({ label: l }),
+    ),
+    talents: Object.entries(c.competences).map(([id, etat]) => ({
+      label: ETAT[etat] + label(COMPETENCES, id),
+      negative: etat === 'ne_plus',
+    })),
+    sens: c.sens_causes.map((id) => ({ label: label(SENS, id) })),
+    equilibre: [
+      ...c.motivations.map((id) => ({ label: label(MOTIVATIONS, id) })),
+      ...Object.entries(c.conditions)
+        .filter(([id, p]) => p?.valeurs?.length && CRITERES_BY_ID[id])
+        .map(([id, p]) => ({
+          label: `${CRITERES_BY_ID[id].libelle} : ${conditionLabel(id, p.valeurs.length === 1 ? p.valeurs[0] : p.valeurs)}${p.importance === 'indispensable' ? ' (indispensable)' : ''}`,
+          negative: p.importance === 'eviter',
+        })),
+    ],
+  }
+}
+
 const plural = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`
 
 function ExplorerContent() {
@@ -164,7 +190,11 @@ function ExplorerContent() {
   const [closedGroups, setClosedGroups] = useState(() => new Set([2]))
 
   const nbCriteria = countCriteria(criteria)
-  const { results, hiddenCount } = useMemo(() => rank(metiers, criteria), [metiers, criteria])
+  const { ecartes } = useSelection()
+  // Les métiers écartés (« Pas pour moi ») sortent des résultats actifs ; ils restent dans le panier.
+  const actifs = useMemo(() => metiers.filter((m) => !ecartes[m.code_rome]), [metiers, ecartes])
+  const nbEcartes = metiers.length - actifs.length
+  const { results, hiddenCount } = useMemo(() => rank(actifs, criteria), [actifs, criteria])
   const groups = useMemo(
     () =>
       NIVEAUX.map((niveau) => ({ niveau, results: results.filter((r) => r.stars === niveau.etoiles) })).filter(
@@ -173,13 +203,7 @@ function ExplorerContent() {
     [results],
   )
 
-  const piliers = activePiliers(criteria)
-  const pilierCounts = {
-    aime: criteria.activites.length + criteria.centres_interet.length,
-    talents: Object.keys(criteria.competences).length,
-    sens: criteria.sens_causes.length,
-    equilibre: criteria.motivations.length + Object.values(criteria.conditions).filter((p) => p?.valeurs?.length).length,
-  }
+  const pilierTags = useMemo(() => ikigaiTags(criteria), [criteria])
 
   // Clic sur un cercle de l'Ikigai : ouvre la section correspondante et la fait défiler à l'écran.
   const selectPilier = (id) => {
@@ -217,12 +241,10 @@ function ExplorerContent() {
     <div className="space-y-6">
       <Guide />
       <IntentBox onCriteria={applyIntent} />
+      <IkigaiDiagram tags={pilierTags} onSelect={selectPilier} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         <div>
-          <div className="mb-4">
-            <IkigaiDiagram active={piliers} counts={pilierCounts} onSelect={selectPilier} />
-          </div>
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-slate-900">Mes critères</h2>
             <button
@@ -252,7 +274,7 @@ function ExplorerContent() {
             <button
               type="button"
               className={buttonPrimary}
-              onClick={() => setSurprises(surprise(metiers, criteria, results))}
+              onClick={() => setSurprises(surprise(actifs, criteria, results))}
             >
               Surprenez-moi
             </button>
@@ -308,6 +330,16 @@ function ExplorerContent() {
               onToggle={() => toggleGroup(g.niveau.etoiles)}
             />
           ))}
+
+          {nbEcartes > 0 && (
+            <p className="text-xs text-slate-500">
+              {plural(nbEcartes, 'métier')} écarté{nbEcartes > 1 ? 's' : ''} (« Pas pour moi ») masqué
+              {nbEcartes > 1 ? 's' : ''}.{' '}
+              <Link to="/panier" className="font-medium text-teal-700 hover:underline">
+                Les retrouver dans mon panier
+              </Link>
+            </p>
+          )}
 
           {nbCriteria > 0 && hiddenCount > 0 && (
             <p className="text-xs text-slate-500">

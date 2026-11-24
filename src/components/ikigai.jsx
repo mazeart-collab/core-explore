@@ -81,101 +81,157 @@ export function IkigaiBadges({ piliers }) {
   )
 }
 
-// Disposition classique de l'Ikigai : 4 cercles qui se chevauchent.
+// Grand diagramme Ikigai (viewBox 600×600) : 4 cercles de rayon 160 qui se chevauchent.
+// Chaque cercle a une zone « libre » (hors chevauchements) où s'affichent les mots-clés choisis.
+const R = 160
+const CX = 300
+const CY = 295
 const CIRCLES = {
-  aime: { cx: 120, cy: 78, lx: 120, ly: 40 },
-  talents: { cx: 78, cy: 120, lx: 44, ly: 124 },
-  sens: { cx: 162, cy: 120, lx: 196, ly: 124 },
-  equilibre: { cx: 120, cy: 162, lx: 120, ly: 210 },
+  aime: { cx: CX, cy: CY - 130, zone: { x: 195, y: 24, w: 210, h: 120 } },
+  talents: { cx: CX - 130, cy: CY, zone: { x: 20, y: 205, w: 182, h: 180 } },
+  sens: { cx: CX + 130, cy: CY, zone: { x: 398, y: 205, w: 182, h: 180 } },
+  equilibre: { cx: CX, cy: CY + 130, zone: { x: 195, y: 448, w: 210, h: 120 } },
 }
-const SHORT = { aime: 'J’aime', talents: 'Talents', sens: 'Sens', equilibre: 'Équilibre' }
+const INVITATIONS = {
+  aime: 'Ajoutez vos activités et centres d’intérêt…',
+  talents: 'Indiquez vos compétences…',
+  sens: 'Choisissez ce qui donne du sens…',
+  equilibre: 'Précisez motivations et conditions…',
+}
+const MAX_TAGS = 3
 
-/** Diagramme Ikigai : chaque cercle s'illumine quand le pilier a au moins un critère ; un clic ouvre la section. */
-export function IkigaiDiagram({ active, counts, onSelect }) {
-  const nbActive = PILIERS.filter((p) => active.has(p.id)).length
+/** Mots-clés d'un pilier : 3 visibles au maximum, puis « +X autres ». */
+function PilierTags({ id, tags, size = 'lg' }) {
+  const shown = tags.slice(0, MAX_TAGS)
+  const rest = tags.length - shown.length
+  const chip = size === 'lg' ? 'text-[12px] leading-[18px] px-2' : 'text-xs px-2 py-0.5'
+  if (!tags.length) return <p className={`${size === 'lg' ? 'text-[13px]' : 'text-xs'} italic text-slate-400`}>{INVITATIONS[id]}</p>
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <h2 className="font-semibold text-slate-900">Votre Ikigai</h2>
-      <p className="mt-0.5 text-xs text-slate-500">
-        {nbActive === 4
-          ? 'Les 4 piliers sont renseignés.'
-          : `${nbActive} pilier${nbActive > 1 ? 's' : ''} sur 4 renseigné${nbActive > 1 ? 's' : ''}. Cliquez sur un cercle pour le compléter.`}
-      </p>
-      <div className="mt-3 flex flex-col items-center gap-4 sm:flex-row lg:flex-col xl:flex-row">
-        <svg viewBox="0 0 240 240" className="w-48 shrink-0" role="group" aria-label="Diagramme Ikigai">
-          {PILIERS.map((p) => {
-            const c = CIRCLES[p.id]
-            const on = active.has(p.id)
-            const color = PILIER_STYLE[p.id].color
-            return (
-              <g
-                key={p.id}
-                role="button"
-                tabIndex={0}
-                aria-label={`${p.libelle} (${p.detail}) : ${on ? `${counts[p.id]} choix` : 'aucun choix'}. Ouvrir.`}
-                className="cursor-pointer outline-none [&:focus-visible>circle]:stroke-[4]"
+    <ul className="flex max-w-full flex-wrap justify-center gap-1">
+      {shown.map((t) => (
+        <li
+          key={t.label}
+          title={t.label}
+          className={`max-w-full truncate rounded-full ring-1 ${chip} ${t.negative ? 'bg-slate-100 text-slate-500 ring-slate-200 line-through decoration-slate-400' : PILIER_STYLE[id].soft}`}
+        >
+          {t.label}
+        </li>
+      ))}
+      {rest > 0 && <li className={`rounded-full bg-white font-medium text-slate-600 ring-1 ring-slate-300 ${chip}`}>+{rest} autre{rest > 1 ? 's' : ''}</li>}
+    </ul>
+  )
+}
+
+const activate = (fn) => ({
+  role: 'button',
+  tabIndex: 0,
+  onClick: fn,
+  onKeyDown: (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      fn()
+    }
+  },
+})
+
+/**
+ * Encart « Votre Ikigai » : les 4 piliers s'illuminent et affichent les mots-clés choisis ;
+ * un clic ouvre la section de critères correspondante.
+ * tags : { aime: [{label, negative?}], talents: [...], sens: [...], equilibre: [...] }
+ */
+export function IkigaiDiagram({ tags, onSelect }) {
+  const active = (id) => tags[id]?.length > 0
+  const nbActive = PILIERS.filter((p) => active(p.id)).length
+  return (
+    <section aria-labelledby="ikigai-titre" className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+        <h2 id="ikigai-titre" className="text-lg font-semibold text-slate-900">
+          Votre Ikigai
+        </h2>
+        <p className="text-sm text-slate-500">
+          {nbActive === 4
+            ? 'Les 4 piliers sont renseignés : vos pistes sont au centre.'
+            : `${nbActive} pilier${nbActive > 1 ? 's' : ''} sur 4 renseigné${nbActive > 1 ? 's' : ''} · cliquez sur un cercle pour le compléter`}
+        </p>
+      </div>
+
+      {/* Ordinateur et tablette : grand diagramme avec les mots-clés dans les cercles */}
+      <svg viewBox="0 0 600 600" className="mx-auto mt-2 hidden w-full max-w-[640px] sm:block" role="group" aria-label="Diagramme Ikigai">
+        {PILIERS.map((p) => {
+          const c = CIRCLES[p.id]
+          const on = active(p.id)
+          const color = PILIER_STYLE[p.id].color
+          return (
+            <circle
+              key={p.id}
+              cx={c.cx}
+              cy={c.cy}
+              r={R}
+              fill={color}
+              fillOpacity={on ? 0.16 : 0.04}
+              stroke={color}
+              strokeOpacity={on ? 0.85 : 0.3}
+              strokeWidth="2"
+              style={{ transition: 'fill-opacity 300ms, stroke-opacity 300ms' }}
+            />
+          )
+        })}
+        {PILIERS.map((p) => {
+          const c = CIRCLES[p.id]
+          const on = active(p.id)
+          return (
+            <g
+              key={p.id}
+              {...activate(() => onSelect(p.id))}
+              aria-label={`${p.libelle} (${p.detail}) : ${on ? `${tags[p.id].length} choix` : 'aucun choix'}. Ouvrir la section.`}
+              className="cursor-pointer outline-none [&:focus-visible>circle]:stroke-[5]"
+            >
+              {/* zone cliquable : tout le cercle */}
+              <circle cx={c.cx} cy={c.cy} r={R} fill="transparent" stroke={PILIER_STYLE[p.id].color} strokeOpacity="0" />
+              <foreignObject x={c.zone.x} y={c.zone.y} width={c.zone.w} height={c.zone.h}>
+                <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
+                  <p className="flex items-center gap-1.5 text-[15px] font-semibold" style={{ color: on ? PILIER_STYLE[p.id].color : '#64748b' }}>
+                    <PilierIcon id={p.id} size={15} />
+                    {p.libelle}
+                  </p>
+                  <PilierTags id={p.id} tags={tags[p.id] || []} />
+                </div>
+              </foreignObject>
+            </g>
+          )
+        })}
+        <circle cx={CX} cy={CY} r={nbActive === 4 ? 30 : 24} fill="white" stroke={nbActive === 4 ? '#0f766e' : '#cbd5e1'} strokeWidth="2" />
+        <text x={CX} y={CY + 4} textAnchor="middle" fontSize="11" fontWeight="600" fill={nbActive === 4 ? '#0f766e' : '#94a3b8'}>
+          Vos pistes
+        </text>
+      </svg>
+
+      {/* Mobile : les 4 piliers en cartes, avec les mêmes mots-clés */}
+      <ul className="mt-4 grid grid-cols-2 gap-2 sm:hidden">
+        {PILIERS.map((p) => {
+          const on = active(p.id)
+          return (
+            <li key={p.id}>
+              <button
+                type="button"
                 onClick={() => onSelect(p.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    onSelect(p.id)
-                  }
+                className="flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 p-3 text-center"
+                style={{
+                  borderColor: on ? PILIER_STYLE[p.id].color : '#e2e8f0',
+                  backgroundColor: on ? `${PILIER_STYLE[p.id].color}12` : 'white',
                 }}
               >
-                <circle
-                  cx={c.cx}
-                  cy={c.cy}
-                  r="58"
-                  fill={color}
-                  fillOpacity={on ? 0.28 : 0.05}
-                  stroke={color}
-                  strokeOpacity={on ? 0.9 : 0.35}
-                  strokeWidth="2"
-                  style={{ transition: 'fill-opacity 300ms, stroke-opacity 300ms' }}
-                />
-                <text
-                  x={c.lx}
-                  y={c.ly}
-                  textAnchor="middle"
-                  fontSize="13"
-                  fontWeight="600"
-                  fill={on ? color : '#94a3b8'}
-                  style={{ pointerEvents: 'none' }}
-                >
-                  {SHORT[p.id]}
-                </text>
-              </g>
-            )
-          })}
-          <circle cx="120" cy="120" r={nbActive === 4 ? 9 : 5} fill={nbActive === 4 ? '#0f766e' : '#cbd5e1'} />
-        </svg>
-        <ul className="w-full space-y-1.5">
-          {PILIERS.map((p) => {
-            const on = active.has(p.id)
-            return (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(p.id)}
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left hover:bg-slate-50"
-                >
-                  <span
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 ${on ? PILIER_STYLE[p.id].soft : 'bg-slate-50 text-slate-400 ring-slate-200'}`}
-                  >
-                    <PilierIcon id={p.id} size={13} />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium text-slate-800">{p.libelle}</span>
-                    <span className="block text-xs text-slate-500">{p.detail}</span>
-                  </span>
-                  <span className="text-xs text-slate-500">{on ? `${counts[p.id]} choix` : 'à compléter'}</span>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-    </div>
+                <span className="flex items-center gap-1 text-sm font-semibold" style={{ color: on ? PILIER_STYLE[p.id].color : '#64748b' }}>
+                  <PilierIcon id={p.id} size={14} />
+                  {p.libelle}
+                </span>
+                <PilierTags id={p.id} tags={tags[p.id] || []} size="sm" />
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </section>
   )
 }
 

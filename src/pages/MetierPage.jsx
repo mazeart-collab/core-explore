@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import JourneeType from '../components/JourneeType'
+import { SecteursTags } from '../components/MetierCard'
+import SelectionButtons from '../components/SelectionButtons'
 import { DataGate, Tag } from '../components/ui'
 import { useMetiers } from '../lib/MetiersContext'
 import {
@@ -276,8 +279,13 @@ function MetierContent() {
           {domaine?.domaine ? ` · ${clean(domaine.domaine)}` : ''}
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">{clean(o.intitule)}</h1>
-        <MetierScopeButton href={o.lien_metierscope} />
+        <SecteursTags metier={metier} />
+        <div className="flex flex-wrap items-center gap-3">
+          <MetierScopeButton href={o.lien_metierscope} />
+          <SelectionButtons metier={metier} size="lg" />
+        </div>
       </header>
+      <JourneeType metier={metier} />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Officiel o={o} />
         <Enrichi e={metier.enrichi_ia} />

@@ -1,6 +1,8 @@
 import { Link } from 'react-router'
 import { UNIVERS, label } from '../lib/taxonomies'
 import { clean, shortDescription } from '../lib/text'
+import { useSelection } from '../lib/SelectionContext'
+import SelectionButtons from './SelectionButtons'
 import { Tag } from './ui'
 
 export function SecteursTags({ metier }) {
@@ -19,14 +21,22 @@ export function SecteursTags({ metier }) {
 
 /** Carte compacte d'un métier, avec lien vers sa fiche. */
 export default function MetierCard({ metier, aside, children }) {
+  const { isEcarte } = useSelection()
+  const ecarte = isEcarte(metier.code_rome)
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5">
+    <article
+      className={`flex flex-col gap-3 rounded-xl border bg-white p-5 transition-opacity ${ecarte ? 'border-dashed border-slate-300 opacity-55 hover:opacity-90' : 'border-slate-200'}`}
+    >
       {aside}
-      <h3 className="text-base font-semibold text-slate-900">
-        <Link to={`/metier/${metier.code_rome}`} className="hover:text-teal-700 hover:underline">
-          {clean(metier.intitule)}
-        </Link>
-      </h3>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-base font-semibold text-slate-900">
+          <Link to={`/metier/${metier.code_rome}`} className="hover:text-teal-700 hover:underline">
+            {clean(metier.intitule)}
+          </Link>
+          {ecarte && <span className="ml-2 align-middle text-xs font-normal text-slate-500">(écarté)</span>}
+        </h3>
+        <SelectionButtons metier={metier} />
+      </div>
       <SecteursTags metier={metier} />
       <p className="text-sm text-slate-600">{shortDescription(metier.officiel_rome.definition)}</p>
       {children}
