@@ -25,8 +25,10 @@ export const INDICATEURS = {
 }
 
 export function identifiants(env = process.env) {
-  const id = env.FRANCE_TRAVAIL_CLIENT_ID
-  const secret = env.FRANCE_TRAVAIL_CLIENT_SECRET
+  // Les espaces, retours à la ligne ou guillemets collés par erreur avec la valeur sont retirés.
+  const nettoie = (v) => String(v || '').trim().replace(/^["']|["']$/g, '').trim()
+  const id = nettoie(env.FRANCE_TRAVAIL_CLIENT_ID)
+  const secret = nettoie(env.FRANCE_TRAVAIL_CLIENT_SECRET)
   return id && secret ? { id, secret } : null
 }
 
@@ -42,7 +44,11 @@ export async function jeton({ id, secret }) {
   })
   if (!r.ok) {
     const detail = (await r.text().catch(() => '')).slice(0, 300)
-    throw new Error(`Authentification France Travail refusée (HTTP ${r.status}). ${detail}`)
+    const aide = /invalid_client/.test(detail)
+      ? ` Identifiant ou clé secrète incorrects (identifiant : ${id.length} caractères, ${id.startsWith("PAR_") ? "commence bien" : "ne commence pas"} par « PAR_ » ; ` +
+        `clé secrète : ${secret.length} caractères).`
+      : ''
+    throw new Error(`Authentification France Travail refusée (HTTP ${r.status}). ${detail}${aide}`)
   }
   const d = await r.json()
   if (!d.access_token) throw new Error('Authentification France Travail : pas de jeton dans la réponse.')
