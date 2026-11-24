@@ -73,17 +73,28 @@ const enumArray = (list, description) => ({
   items: { type: 'string', enum: ids(list) },
 })
 
+// Pas de types union (anyOf / null) : l'API limite leur nombre à 16 par schéma.
+// « non_applicable » remplace null dans la réponse du modèle et est reconverti en null ensuite.
+const NON_APPLICABLE = 'non_applicable'
 const conditionsSchema = {
   type: 'object',
   additionalProperties: false,
   required: CRITERES.map((c) => c.id),
   properties: Object.fromEntries(
     CRITERES.map((c) => {
-      const opts = c.options.map((o) => o.id)
+      const values = [...c.options.map((o) => o.id), 'variable', NON_APPLICABLE]
       const schema =
         c.type === 'choix_multiple'
-          ? { anyOf: [{ type: 'array', items: { type: 'string', enum: opts } }, { type: 'string', enum: ['variable'] }, { type: 'null' }] }
-          : { anyOf: [{ type: 'string', enum: [...opts, 'variable'] }, { type: 'null' }] }
+          ? {
+              type: 'array',
+              description: `Une ou plusieurs valeurs. Uniquement ["variable"] si cela dépend de l'employeur, ["${NON_APPLICABLE}"] si inconnu.`,
+              items: { type: 'string', enum: values },
+            }
+          : {
+              type: 'string',
+              description: `"variable" si cela dépend de l'employeur, "${NON_APPLICABLE}" si inconnu ou non pertinent.`,
+              enum: values,
+            }
       return [c.id, schema]
     }),
   ),
@@ -142,7 +153,7 @@ Règles :
 - Appuie-toi d'abord sur les données officielles fournies (définition, activités, compétences, contextes de travail). N'invente pas de faits.
 - Sois sélectif : ne retiens que ce qui caractérise vraiment le métier, pas ce qui est simplement possible.
 - secteurs : 1 à 3 univers, le plus pertinent en premier.
-- conditions_travail : pour chaque critère, choisis la valeur typique du métier. Mets "variable" quand cela dépend trop de l'employeur ou du poste, et null si tu ne peux pas raisonnablement l'estimer.
+- conditions_travail : pour chaque critère, choisis la valeur typique du métier. Mets "variable" quand cela dépend trop de l'employeur ou du poste, et "non_applicable" si tu ne peux pas raisonnablement l'estimer ou si le critère ne s'applique pas.
 - points_vigilance : 2 à 3 points concrets et vérifiables à examiner avant de s'engager (contraintes physiques, horaires, diplôme réglementé, conditions d'accès, marché de l'emploi…), en français, une phrase courte chacun.
 
 ## Univers professionnels (secteurs)
@@ -163,7 +174,7 @@ ${list(T.sens_causes)}
 ## Motivations
 ${list(T.motivations)}
 
-## Conditions de travail (valeurs possibles, en plus de "variable" et null)
+## Conditions de travail (valeurs possibles, en plus de "variable" et "non_applicable")
 ${crit}`
 }
 
@@ -217,9 +228,15 @@ function sanitize(raw) {
   out.conditions_travail = {}
   for (const c of CRITERES) {
     const opts = new Set(c.options.map((o) => o.id))
-    let v = raw.conditions_travail?.[c.id]
-    if (v === undefined) v = null
-    if (c.type === 'choix_multiple' && Array.isArray(v)) v = [...new Set(v.filter((x) => opts.has(x)))]
+    let v = raw.conditions_travail?.[c.id] ?? null
+    if (c.type === 'choix_multiple' && Array.isArray(v)) {
+      const vals = [...new Set(v)]
+      if (vals.includes('variable')) v = 'variable'
+      else {
+        v = vals.filter((x) => opts.has(x))
+        if (!v.length) v = null // vide ou ["non_applicable"]
+      }
+    } else if (v === NON_APPLICABLE) v = null
     else if (v !== null && v !== 'variable' && !opts.has(v)) {
       warnings.push(`conditions_travail.${c.id} : valeur « ${v} » ignorée`)
       v = null
@@ -397,7 +414,10 @@ async function main() {
       } catch (err) {
         failed++
         console.error(`✖ ${f.code_rome} ${f.intitule} : ${err.message}`)
-        if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) {
+        if (err instanceof Anthropic.BadRequestError) {
+          stop = true
+          console.error('Arrêt : requête refusée par l\'API (400), elle échouerait pour tous les métiers.')
+        } else if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) {
           stop = true
           console.error('Arrêt : clé API invalide ou sans accès au modèle.')
         } else if (err instanceof Anthropic.NotFoundError) {
