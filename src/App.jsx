@@ -1,11 +1,28 @@
-// Écran provisoire : l'application sera construite une fois la base métiers prête.
+import { BrowserRouter, Route, Routes } from 'react-router'
+import Layout from './components/Layout'
+import { MetiersProvider } from './lib/MetiersContext'
+import About from './pages/About'
+import Catalogue from './pages/Catalogue'
+import Explorer from './pages/Explorer'
+import Home from './pages/Home'
+import MetierPage from './pages/MetierPage'
+import NotFound from './pages/NotFound'
+
 export default function App() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-800">
-      <div className="text-center space-y-2 px-4">
-        <h1 className="text-3xl font-semibold">CORE Explore</h1>
-        <p className="text-slate-500">Base métiers en cours de construction.</p>
-      </div>
-    </main>
+    <MetiersProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="univers" element={<Catalogue />} />
+            <Route path="ce-qui-m-anime" element={<Explorer />} />
+            <Route path="metier/:code" element={<MetierPage />} />
+            <Route path="a-propos" element={<About />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </MetiersProvider>
   )
 }
