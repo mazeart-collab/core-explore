@@ -1,63 +1,76 @@
 #!/usr/bin/env node
 /**
- * Diagnostic : découvre le format de l'indicateur « Salaire proposé » de l'API Marché du travail
- * (France Travail), dont la documentation n'est pas lisible depuis l'environnement de développement.
- * Le script appelle plusieurs variantes de requêtes pour un code ROME et affiche les réponses brutes
- * (jamais les identifiants). Rien n'est écrit dans les données.
+ * Diagnostic : format des tranches de salaire de l'API Marché du travail (France Travail).
+ * Les salaires sont des « caractéristiques » (codeTypeCaract SALAIRE) de l'indicateur stat-offres.
+ * Le script affiche une synthèse compacte, sans rien écrire dans les données.
  *
- * Usage : FRANCE_TRAVAIL_CLIENT_ID=… FRANCE_TRAVAIL_CLIENT_SECRET=… node scripts/diagnostic-salaires.mjs [--code=M1405]
+ * Usage : FRANCE_TRAVAIL_CLIENT_ID=… FRANCE_TRAVAIL_CLIENT_SECRET=… node scripts/diagnostic-salaires.mjs
  */
 import { identifiants, jeton } from '../api/_lib/france-travail.js'
 
 const API_URL =
   process.env.FRANCE_TRAVAIL_API_URL || 'https://api.francetravail.io/partenaire/stats-offres-demandes-emploi/v1'
-const code =
-  process.argv.find((a) => a.startsWith('--code='))?.split('=')[1] ||
-  String(process.env.CODES || '').split(/[\s,;]+/).find(Boolean) ||
-  'M1405'
-
 const creds = identifiants()
 if (!creds) {
-  console.error('Identifiants France Travail absents (secrets FRANCE_TRAVAIL_CLIENT_ID / FRANCE_TRAVAIL_CLIENT_SECRET).')
+  console.error('Identifiants France Travail absents.')
   process.exit(1)
 }
 const token = await jeton(creds)
-console.log(`Connexion réussie. Code ROME testé : ${code}\n`)
-
-const base = { codeTypeTerritoire: 'NAT', codeTerritoire: 'FR', codeTypeActivite: 'ROME', codeActivite: code }
-const essais = [
-  // Les indicateurs connus, avec leurs « caractéristiques » (le salaire pourrait en faire partie).
-  ['POST', '/indicateur/stat-offres', { ...base, codeTypePeriode: 'TRIMESTRE', codeTypeNomenclature: 'ORIGINEOFF', listeCodeNomenclature: ['TOFF-CUMUL12MOIS'], dernierePeriode: true, sansCaracteristiques: false }],
-  ['POST', '/indicateur/stat-offres', { ...base, codeTypePeriode: 'TRIMESTRE', codeTypeNomenclature: 'ORIGINEOFF', dernierePeriode: true, sansCaracteristiques: false }],
-  // Référentiel des nomenclatures : le format /referentiel/nomenclature/{code} semble exister.
-  ['GET', '/referentiel/nomenclature/ORIGINEOFF'],
-  ['GET', '/referentiel/nomenclature/TYPE_SALAIRE'],
-  ['GET', '/referentiel/nomenclature/SALAIRE'],
-  ['GET', '/referentiel/nomenclature/TYPE_SAL'],
-  ['GET', '/referentiel/nomenclatures'],
-  ['GET', '/referentiel/indicateurs'],
-  ['GET', '/referentiel/caracteristiques'],
-  ['GET', '/referentiel/caracteristique/ORIGINEOFF'],
-  ['GET', '/referentiel/periode/TRIMESTRE'],
-  ['GET', '/referentiel/activite/ROME'],
-  // Autres noms possibles de l'indicateur salaire.
-  ['POST', '/indicateur/stat-salaire-propose', { ...base, dernierePeriode: true }],
-  ['POST', '/indicateur/stat-salaires-offres', { ...base, dernierePeriode: true }],
-  ['POST', '/indicateur/stat-remuneration', { ...base, dernierePeriode: true }],
-  ['POST', '/indicateur/salaires', { ...base, dernierePeriode: true }],
-  ['POST', '/indicateur/stat-salaire-offre', { ...base, dernierePeriode: true }],
-]
-
-for (const [methode, chemin, corps] of essais) {
+const appel = async (methode, chemin, corps) => {
   const r = await fetch(API_URL + chemin, {
     method: methode,
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
     body: corps ? JSON.stringify(corps) : undefined,
-  }).catch((e) => ({ status: 'erreur réseau', text: async () => e.message }))
-  const texte = await r.text()
-  console.log(`===== ${methode} ${chemin}${corps ? ' ' + JSON.stringify(corps) : ''}`)
-  console.log(`HTTP ${r.status}`)
-  console.log(texte.slice(0, 6000) || '(réponse vide)')
-  console.log('')
-  await new Promise((res) => setTimeout(res, 300))
+  })
+  const t = await r.text()
+  try {
+    return { status: r.status, json: JSON.parse(t) }
+  } catch {
+    return { status: r.status, texte: t.slice(0, 500) }
+  }
+}
+
+console.log('===== 1. Liste des indicateurs')
+const ind = await appel('GET', '/referentiel/indicateurs')
+for (const i of ind.json?.indicateurs || []) console.log(`${i.codeIndicateur} | ${i.libelleIndicateur}`)
+
+console.log('\n===== 2. Caractéristiques de type salaire dans le référentiel')
+const car = await appel('GET', '/referentiel/caracteristiques')
+for (const c of car.json?.caracteristiques || []) {
+  if (/SAL/i.test(c.codeTypeCaracteristique) || /salaire|rémun/i.test(c.libelleCaracteristique))
+    console.log(`${c.codeTypeCaracteristique} | ${c.codeCaracteristique} | ${c.libelleCaracteristique}`)
+}
+
+console.log('\n===== 3. Nomenclatures liées au salaire')
+const nom = await appel('GET', '/referentiel/nomenclatures')
+for (const n of nom.json?.nomenclatures || []) {
+  if (/SAL/i.test(n.codeTypeNomenclature) || /salaire|rémun/i.test(n.libelleNomenclature))
+    console.log(`${n.codeTypeNomenclature} | ${n.codeNomenclature} | ${n.libelleNomenclature}`)
+}
+console.log('Types de nomenclature existants :', [...new Set((nom.json?.nomenclatures || []).map((n) => n.codeTypeNomenclature))].join(', '))
+
+console.log('\n===== 4. Tranches de salaire des offres pour quelques métiers (France entière)')
+for (const code of ['M1405', 'K1302', 'D1106', 'F1703', 'J1506']) {
+  for (const origine of ['TOFF-CUMUL12MOIS', 'PE-CUMUL12MOIS']) {
+    const r = await appel('POST', '/indicateur/stat-offres', {
+      codeTypeTerritoire: 'NAT',
+      codeTerritoire: 'FR',
+      codeTypeActivite: 'ROME',
+      codeActivite: code,
+      codeTypePeriode: 'TRIMESTRE',
+      codeTypeNomenclature: 'ORIGINEOFF',
+      listeCodeNomenclature: [origine],
+      dernierePeriode: true,
+      sansCaracteristiques: false,
+    })
+    const l = r.json?.listeValeursParPeriode?.[0]
+    if (!l) {
+      console.log(`${code} ${origine} : HTTP ${r.status} ${r.texte || JSON.stringify(r.json).slice(0, 300)}`)
+      continue
+    }
+    const sal = (l.listeValeurParCaract || []).filter((c) => c.codeTypeCaract === 'SALAIRE' || /SAL/.test(c.codeTypeCaract))
+    console.log(`${code} ${l.libActivite} · ${origine} · ${l.libPeriode} · ${l.valeurPrincipaleNombre} offres`)
+    for (const c of sal) console.log(`   ${c.codeTypeCaract} ${c.codeCaract} | ${c.libCaract} | ${JSON.stringify({ nombre: c.nombre, pourcentage: c.pourcentage, masque: c.masque, autres: Object.keys(c).filter((k) => !['codeTypeCaract', 'codeCaract', 'libCaract', 'nombre', 'pourcentage', 'masque'].includes(k)) })}`)
+    await new Promise((res) => setTimeout(res, 250))
+  }
 }
