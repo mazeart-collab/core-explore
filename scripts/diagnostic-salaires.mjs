@@ -30,6 +30,43 @@ const appel = async (methode, chemin, corps) => {
   }
 }
 
+// SAL_3 : « Salaires en poste par typologie salaires (moyen / débutant / expérimenté) x caractéristiques »,
+// nomenclature TYPESALAIRE (SAL1 moins de 35 ans, SAL2 35 ans et +, SAL3 tout âge), déciles SAL_D10 / SAL_D90.
+console.log('===== Recherche du chemin de l\'indicateur SAL_3 (salaires en poste)')
+const corps = (extra = {}) => ({
+  codeTypeTerritoire: 'NAT',
+  codeTerritoire: 'FR',
+  codeTypeActivite: 'ROME',
+  codeActivite: 'M1405',
+  codeTypePeriode: 'ANNEE',
+  codeTypeNomenclature: 'TYPESALAIRE',
+  listeCodeNomenclature: ['SAL3'],
+  dernierePeriode: true,
+  sansCaracteristiques: false,
+  ...extra,
+})
+const chemins = [
+  '/indicateur/salaire-rome-fap',
+  '/indicateur/stat-salaire-rome-fap',
+  '/indicateur/stat-salaires-en-poste',
+  '/indicateur/stat-salaire-en-poste',
+  '/indicateur/stat-salaires-poste',
+  '/indicateur/stat-salaries',
+  '/indicateur/stat-salaire',
+  '/indicateur/stat-salaires',
+  '/indicateur/salaires',
+  '/indicateur/salaire',
+  '/indicateur/stat-remunerations',
+  '/indicateur/SAL_3',
+  '/indicateur/sal-3',
+]
+for (const chemin of chemins) {
+  const r = await appel('POST', chemin, corps())
+  const resume = r.json ? JSON.stringify(r.json) : r.texte
+  console.log(`${chemin} → HTTP ${r.status} ${r.status === 404 && /Could not find resource/.test(resume) ? '(chemin inexistant)' : resume.slice(0, 3000)}`)
+  await new Promise((res) => setTimeout(res, 200))
+}
+console.log('')
 console.log('===== 1. Liste des indicateurs')
 const ind = await appel('GET', '/referentiel/indicateurs')
 for (const i of ind.json?.indicateurs || []) console.log(`${i.codeIndicateur} | ${i.libelleIndicateur}`)
@@ -49,28 +86,3 @@ for (const n of nom.json?.nomenclatures || []) {
 }
 console.log('Types de nomenclature existants :', [...new Set((nom.json?.nomenclatures || []).map((n) => n.codeTypeNomenclature))].join(', '))
 
-console.log('\n===== 4. Tranches de salaire des offres pour quelques métiers (France entière)')
-for (const code of ['M1405', 'K1302', 'D1106', 'F1703', 'J1506']) {
-  for (const origine of ['TOFF-CUMUL12MOIS', 'PE-CUMUL12MOIS']) {
-    const r = await appel('POST', '/indicateur/stat-offres', {
-      codeTypeTerritoire: 'NAT',
-      codeTerritoire: 'FR',
-      codeTypeActivite: 'ROME',
-      codeActivite: code,
-      codeTypePeriode: 'TRIMESTRE',
-      codeTypeNomenclature: 'ORIGINEOFF',
-      listeCodeNomenclature: [origine],
-      dernierePeriode: true,
-      sansCaracteristiques: false,
-    })
-    const l = r.json?.listeValeursParPeriode?.[0]
-    if (!l) {
-      console.log(`${code} ${origine} : HTTP ${r.status} ${r.texte || JSON.stringify(r.json).slice(0, 300)}`)
-      continue
-    }
-    const sal = (l.listeValeurParCaract || []).filter((c) => c.codeTypeCaract === 'SALAIRE' || /SAL/.test(c.codeTypeCaract))
-    console.log(`${code} ${l.libActivite} · ${origine} · ${l.libPeriode} · ${l.valeurPrincipaleNombre} offres`)
-    for (const c of sal) console.log(`   ${c.codeTypeCaract} ${c.codeCaract} | ${c.libCaract} | ${JSON.stringify({ nombre: c.nombre, pourcentage: c.pourcentage, masque: c.masque, autres: Object.keys(c).filter((k) => !['codeTypeCaract', 'codeCaract', 'libCaract', 'nombre', 'pourcentage', 'masque'].includes(k)) })}`)
-    await new Promise((res) => setTimeout(res, 250))
-  }
-}
