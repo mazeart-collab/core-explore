@@ -7,7 +7,7 @@ Application web d'exploration des métiers (React + Vite + Tailwind CSS), constr
 | URL | Page |
 | --- | --- |
 | `/` | Accueil |
-| `/univers` | L'univers des possibles : univers par familles, recherche tolérante aux fautes |
+| `/univers` | Explorer les métiers : univers par familles, recherche tolérante aux fautes |
 | `/metier/:code_rome` | Fiche métier (données officielles ROME et repères enrichis séparés) |
 | `/ce-qui-m-anime` | Je trouve ce qui m'anime : critères, recherche en langage naturel, résultats, « Surprenez-moi » |
 | `/a-propos` | À propos et sources |

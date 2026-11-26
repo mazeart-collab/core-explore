@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { DEPARTEMENTS, TENSIONS, lienFormations, lienOffres } from '../lib/marche'
-import { clean } from '../lib/text'
 import { useStoredState } from '../lib/useStoredState'
 
 /** Badge discret de tension, affiché seulement quand la donnée existe. */
@@ -128,11 +127,18 @@ export function MarcheLocal({ metier }) {
               </Chiffre>
             )}
             {m.demandeurs_emploi !== null && (
-              <Chiffre titre="Demandeurs d’emploi (catégorie A)" detail={m.periode?.demandeurs}>
+              <Chiffre titre="Personnes qui recherchent ce métier" detail={m.periode?.demandeurs}>
                 {fmt(m.demandeurs_emploi)}
               </Chiffre>
             )}
           </dl>
+          {m.demandeurs_emploi !== null && (
+            <p className="text-sm text-slate-600">
+              Ce chiffre compte les demandeurs d’emploi inscrits à France Travail qui recherchent ce métier et qui n’ont
+              pas du tout travaillé au cours du mois (on parle de « catégorie A »). Le comparer au nombre d’offres donne
+              une idée de la concurrence pour un poste.
+            </p>
+          )}
           <p className="text-xs text-slate-500">
             Source : {m.source}
             {m.annee ? ` (${m.annee})` : ''}.
@@ -157,7 +163,7 @@ export function MarcheLocal({ metier }) {
         {metier.officiel_rome.lien_metierscope && (
           <Bouton href={metier.officiel_rome.lien_metierscope}>Salaires &amp; statistiques détaillées</Bouton>
         )}
-        <Bouton href={lienFormations(clean(metier.intitule))}>Voir les formations éligibles</Bouton>
+        <Bouton href={lienFormations(metier.code_rome)}>Voir les formations pour ce métier</Bouton>
       </div>
     </section>
   )

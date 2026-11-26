@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { SecteursTags } from '../components/MetierCard'
+import { Reperes, SecteursTags } from '../components/MetierCard'
 import { HeartIcon, ThumbDownIcon } from '../components/SelectionButtons'
-import { DataGate, PageTitle, buttonPrimary, buttonSecondary } from '../components/ui'
+import { ConfirmDialog, DataGate, PageTitle, buttonPrimary, buttonSecondary } from '../components/ui'
 import { useMetiers } from '../lib/MetiersContext'
 import { useSelection } from '../lib/SelectionContext'
 import { UNIVERS, label } from '../lib/taxonomies'
-import { clean, shortDescription } from '../lib/text'
+import { clean } from '../lib/text'
 
 const byDate = (entries) => [...entries].sort((a, b) => (a[1].date < b[1].date ? 1 : -1))
 
@@ -29,6 +29,7 @@ function selectionText(favoris, byCode) {
 
 function FavoriItem({ metier, info }) {
   const { setNote, toggleFavori } = useSelection()
+  const [confirmer, setConfirmer] = useState(false)
   const id = `note-${metier.code_rome}`
   return (
     <li className="rounded-xl border border-slate-200 bg-white p-5 print:break-inside-avoid print:border-slate-300">
@@ -41,7 +42,7 @@ function FavoriItem({ metier, info }) {
             <span className="ml-2 text-xs font-normal text-slate-500">Code ROME {metier.code_rome}</span>
           </h2>
           <SecteursTags metier={metier} />
-          <p className="text-sm text-slate-600">{shortDescription(metier.officiel_rome.definition, 180)}</p>
+          <Reperes metier={metier} />
         </div>
         <div className="flex shrink-0 gap-2 print:hidden">
           <Link to={`/metier/${metier.code_rome}`} className="text-sm font-medium text-teal-700 hover:underline">
@@ -49,11 +50,25 @@ function FavoriItem({ metier, info }) {
           </Link>
           <button
             type="button"
-            onClick={() => toggleFavori(metier.code_rome)}
+            onClick={() => setConfirmer(true)}
             className="text-sm font-medium text-slate-500 hover:text-rose-700"
           >
             Retirer
           </button>
+          <ConfirmDialog
+            open={confirmer}
+            title={`Retirer « ${clean(metier.intitule)} » de vos favoris ?`}
+            confirmLabel="Retirer"
+            onCancel={() => setConfirmer(false)}
+            onConfirm={() => {
+              setConfirmer(false)
+              toggleFavori(metier.code_rome)
+            }}
+          >
+            {info.note?.trim()
+              ? 'Votre note sur ce métier sera aussi supprimée.'
+              : 'Vous pourrez le remettre dans vos favoris à tout moment depuis sa fiche.'}
+          </ConfirmDialog>
         </div>
       </div>
       <label htmlFor={id} className="mt-4 block text-sm font-medium text-slate-700 print:hidden">

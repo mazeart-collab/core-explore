@@ -6,7 +6,7 @@ import { HeartIcon } from './SelectionButtons'
 
 const NAV = [
   { to: '/', label: 'Accueil', end: true },
-  { to: '/univers', label: 'L’univers des possibles' },
+  { to: '/univers', label: 'Explorer les métiers' },
   { to: '/ce-qui-m-anime', label: 'Je trouve ce qui m’anime' },
   { to: '/a-propos', label: 'À propos' },
 ]

@@ -23,10 +23,6 @@ function SearchBar({ value, onChange }) {
           autoComplete="off"
         />
       </div>
-      <p className="mt-1.5 text-xs text-slate-500">
-        La recherche porte sur les intitulés, les autres appellations, les définitions, les activités, les savoirs et
-        les repères enrichis. Les accents et petites fautes de frappe sont tolérés.
-      </p>
     </div>
   )
 }
@@ -55,25 +51,14 @@ function MetierGrid({ metiers }) {
   )
 }
 
-function UniversOverview({ counts, isComplete }) {
-  const [hideEmpty, setHideEmpty] = useState(!isComplete)
+/** Univers regroupés par familles ; les univers sans aucun métier ne sont pas affichés. */
+function UniversOverview({ counts }) {
   return (
     <>
-      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">Les univers professionnels</h2>
-        <label className="inline-flex items-center gap-2 text-sm text-slate-600">
-          <input
-            type="checkbox"
-            checked={hideEmpty}
-            onChange={(e) => setHideEmpty(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 accent-teal-700"
-          />
-          Masquer les univers sans métier
-        </label>
-      </div>
+      <h2 className="mb-6 text-lg font-semibold text-slate-900">Les univers professionnels</h2>
       <div className="space-y-10">
         {FAMILLES.map((famille) => {
-          const univers = famille.univers.filter((id) => !hideEmpty || counts[id])
+          const univers = famille.univers.filter((id) => counts[id])
           if (!univers.length) return null
           return (
             <section key={famille.id} aria-labelledby={`famille-${famille.id}`}>
@@ -87,24 +72,18 @@ function UniversOverview({ counts, isComplete }) {
                     <>
                       <span className="font-medium text-slate-900">{UNIVERS[id]?.libelle ?? id}</span>
                       <span className="mt-1 block text-sm text-slate-500">
-                        {n ? `${n} métier${n > 1 ? 's' : ''}` : 'Aucun métier pour le moment'}
+                        {`${n} métier${n > 1 ? 's' : ''}`}
                       </span>
                     </>
                   )
                   return (
                     <li key={id}>
-                      {n ? (
-                        <Link
-                          to={`?univers=${id}`}
-                          className="block h-full rounded-xl border border-slate-200 bg-white p-4 transition hover:border-teal-600 hover:shadow-sm"
-                        >
-                          {content}
-                        </Link>
-                      ) : (
-                        <div className="block h-full rounded-xl border border-dashed border-slate-200 bg-white/60 p-4 opacity-70">
-                          {content}
-                        </div>
-                      )}
+                      <Link
+                        to={`?univers=${id}`}
+                        className="block h-full rounded-xl border border-slate-200 bg-white p-4 transition hover:border-teal-600 hover:shadow-sm"
+                      >
+                        {content}
+                      </Link>
                     </li>
                   )
                 })}
@@ -118,7 +97,7 @@ function UniversOverview({ counts, isComplete }) {
 }
 
 function CatalogueContent() {
-  const { metiers, meta } = useMetiers()
+  const { metiers } = useMetiers()
   const [params, setParams] = useSearchParams()
   const query = params.get('q') || ''
   const universId = params.get('univers')
@@ -190,7 +169,7 @@ function CatalogueContent() {
       </section>
     )
   } else {
-    body = <UniversOverview counts={counts} isComplete={meta?.complet !== false} />
+    body = <UniversOverview counts={counts} />
   }
 
   return (
@@ -204,7 +183,7 @@ function CatalogueContent() {
 export default function Catalogue() {
   return (
     <>
-      <PageTitle title="L’univers des possibles">
+      <PageTitle title="Explorer les métiers">
         Parcourez les métiers par grands univers professionnels, ou recherchez directement un métier.
       </PageTitle>
       <DataGate>
