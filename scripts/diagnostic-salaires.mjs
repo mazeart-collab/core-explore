@@ -26,15 +26,26 @@ console.log(`Connexion réussie. Code ROME testé : ${code}\n`)
 
 const base = { codeTypeTerritoire: 'NAT', codeTerritoire: 'FR', codeTypeActivite: 'ROME', codeActivite: code }
 const essais = [
-  ['GET', '/indicateur'],
-  ['POST', '/indicateur/stat-salaires', { ...base, dernierePeriode: true }],
-  ['POST', '/indicateur/stat-salaires', { ...base, codeTypePeriode: 'ANNEE', dernierePeriode: true }],
-  ['POST', '/indicateur/stat-salaires', { ...base, codeTypePeriode: 'TRIMESTRE', dernierePeriode: true }],
-  ['POST', '/indicateur/stat-salaire', { ...base, dernierePeriode: true }],
-  ['POST', '/indicateur/stat-salaires-proposes', { ...base, dernierePeriode: true }],
-  ['POST', '/indicateur/stat-offres-salaires', { ...base, dernierePeriode: true }],
-  ['GET', '/referentiel/nomenclature'],
-  ['GET', '/referentiel/indicateur'],
+  // Les indicateurs connus, avec leurs « caractéristiques » (le salaire pourrait en faire partie).
+  ['POST', '/indicateur/stat-offres', { ...base, codeTypePeriode: 'TRIMESTRE', codeTypeNomenclature: 'ORIGINEOFF', listeCodeNomenclature: ['TOFF-CUMUL12MOIS'], dernierePeriode: true, sansCaracteristiques: false }],
+  ['POST', '/indicateur/stat-offres', { ...base, codeTypePeriode: 'TRIMESTRE', codeTypeNomenclature: 'ORIGINEOFF', dernierePeriode: true, sansCaracteristiques: false }],
+  // Référentiel des nomenclatures : le format /referentiel/nomenclature/{code} semble exister.
+  ['GET', '/referentiel/nomenclature/ORIGINEOFF'],
+  ['GET', '/referentiel/nomenclature/TYPE_SALAIRE'],
+  ['GET', '/referentiel/nomenclature/SALAIRE'],
+  ['GET', '/referentiel/nomenclature/TYPE_SAL'],
+  ['GET', '/referentiel/nomenclatures'],
+  ['GET', '/referentiel/indicateurs'],
+  ['GET', '/referentiel/caracteristiques'],
+  ['GET', '/referentiel/caracteristique/ORIGINEOFF'],
+  ['GET', '/referentiel/periode/TRIMESTRE'],
+  ['GET', '/referentiel/activite/ROME'],
+  // Autres noms possibles de l'indicateur salaire.
+  ['POST', '/indicateur/stat-salaire-propose', { ...base, dernierePeriode: true }],
+  ['POST', '/indicateur/stat-salaires-offres', { ...base, dernierePeriode: true }],
+  ['POST', '/indicateur/stat-remuneration', { ...base, dernierePeriode: true }],
+  ['POST', '/indicateur/salaires', { ...base, dernierePeriode: true }],
+  ['POST', '/indicateur/stat-salaire-offre', { ...base, dernierePeriode: true }],
 ]
 
 for (const [methode, chemin, corps] of essais) {
@@ -46,7 +57,7 @@ for (const [methode, chemin, corps] of essais) {
   const texte = await r.text()
   console.log(`===== ${methode} ${chemin}${corps ? ' ' + JSON.stringify(corps) : ''}`)
   console.log(`HTTP ${r.status}`)
-  console.log(texte.slice(0, 4000) || '(réponse vide)')
+  console.log(texte.slice(0, 6000) || '(réponse vide)')
   console.log('')
   await new Promise((res) => setTimeout(res, 300))
 }
