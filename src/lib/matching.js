@@ -95,32 +95,73 @@ export function starsFor(rate) {
   return NIVEAUX.find((n) => rate >= n.min)?.etoiles ?? 0
 }
 
-// Barème absolu : chaque critère positif coché compte individuellement.
-// Le taux = points gagnés / somme des poids de tous les critères positifs cochés,
-// sans aucune normalisation par rapport aux autres métiers.
+// Barème par pilier de l'Ikigai, pondéré par la rareté des critères.
+// - Chaque critère positif vaut un poids d'autant plus grand qu'il est rare parmi les métiers
+//   (« Organisation et rigueur », présent presque partout, compte peu ; « Protéger les animaux » compte beaucoup).
+// - Dans chaque dimension, on ne compte au plus que ce qu'un métier peut contenir (PLAFONDS) :
+//   cocher 12 activités ne rend plus 100 % impossible.
+// - Le taux final est la moyenne des piliers renseignés : chaque pilier pèse pareil.
+// Le taux reste absolu : il n'est jamais comparé au meilleur métier.
 const LIST_DIMENSIONS = [
   { key: 'activites', map: ACTIVITES, dimension: 'Activités que vous aimez', pilier: 'aime' },
   { key: 'centres_interet', map: CENTRES_INTERET, dimension: "Centres d'intérêt", pilier: 'aime' },
   { key: 'sens_causes', map: SENS, dimension: 'Ce qui donne du sens', pilier: 'sens' },
   { key: 'motivations', map: MOTIVATIONS, dimension: 'Motivations', pilier: 'equilibre' },
 ]
-const POIDS_TAG = 1 // activité, centre d'intérêt, sens, motivation, compétence à utiliser ou développer
+const RARETE_KEYS = ['activites', 'centres_interet', 'sens_causes', 'motivations', 'competences_categories']
+// Nombre maximal de critères comptés par dimension (≈ ce que porte un métier).
+const PLAFONDS = { activites: 5, centres_interet: 3, sens_causes: 2, motivations: 3, competences_categories: 3 }
 const POIDS_CONDITION = { indispensable: 3, souhaitable: 1 }
-const PENALITE = 3 // par infraction (« Ne veux plus utiliser » ou « À éviter »)
+const PENALITE = 0.15 // retirée du taux par infraction (« Ne veux plus utiliser » ou « À éviter »)
 const MAX_ETOILES_SI_INFRACTION = 3
 const MAX_ETOILES_SI_INDISPENSABLE_MANQUE = 4
+/** Nombre minimal de piliers en commun quand l'utilisateur en a renseigné au moins autant. */
+export const PILIERS_MIN = 3
+/** Taille d'une page de résultats (« Voir plus » en ajoute autant). */
+export const PAGE_RESULTATS = 20
+
+const rareteCache = new WeakMap()
+/** Poids de rareté (IDF) de chaque étiquette, calculé une fois par liste de métiers. */
+export function rarete(metiers) {
+  let r = rareteCache.get(metiers)
+  if (r) return r
+  const df = {}
+  for (const m of metiers) {
+    const e = m.enrichi_ia || {}
+    for (const k of RARETE_KEYS) for (const t of e[k] || []) df[`${k}:${t}`] = (df[`${k}:${t}`] || 0) + 1
+  }
+  const n = metiers.length
+  r = (k, t) => Math.log((n + 1) / ((df[`${k}:${t}`] || 0) + 1)) + 0.1
+  rareteCache.set(metiers, r)
+  return r
+}
+
+const sommeTop = (poids, k) =>
+  poids
+    .sort((a, b) => b - a)
+    .slice(0, k)
+    .reduce((a, b) => a + b, 0)
 
 /**
  * Évalue un métier par rapport aux critères.
- * Renvoie { rate (0–1, interne), stars, reasons: [{dimension, items}], gaps: [texte], piliers: Set }.
+ * `poids` : fonction de rareté renvoyée par rarete(metiers) (sinon tous les critères pèsent 1).
+ * Renvoie { rate (0–1, interne), stars, reasons: [{dimension, items}], gaps: [texte], piliers: Set,
+ *           piliersActifs, focus (0–1, départage les ex æquo) }.
  */
-export function evaluate(metier, criteria) {
+export function evaluate(metier, criteria, poids = () => 1) {
   const e = metier.enrichi_ia || {}
   const reasons = []
   const gaps = []
   const piliers = new Set()
-  let maxPossiblePoints = 0
-  let earnedPoints = 0
+  const score = {} // pilier -> { gagne, max }
+  const ajoute = (pilier, gagne, max) => {
+    if (!max) return
+    score[pilier] ||= { gagne: 0, max: 0 }
+    score[pilier].gagne += gagne
+    score[pilier].max += max
+  }
+  let rareteCommune = 0
+  let rareteMetier = 0 // poids des étiquettes du métier dans les dimensions renseignées
   let infractions = 0
   let indispensableManque = false
 
@@ -128,27 +169,40 @@ export function evaluate(metier, criteria) {
     const mine = criteria[d.key]
     if (!mine.length) continue
     const set = new Set(e[d.key] || [])
-    const items = mine.filter((id) => set.has(id)).map((id) => label(d.map, id))
-    maxPossiblePoints += mine.length * POIDS_TAG
-    earnedPoints += items.length * POIDS_TAG
-    if (items.length) {
-      reasons.push({ dimension: d.dimension, items })
+    for (const t of set) rareteMetier += poids(d.key, t)
+    const communs = mine.filter((id) => set.has(id))
+    const pCommuns = communs.map((id) => poids(d.key, id))
+    rareteCommune += pCommuns.reduce((a, b) => a + b, 0)
+    ajoute(d.pilier, sommeTop(pCommuns, PLAFONDS[d.key]), sommeTop(mine.map((id) => poids(d.key, id)), PLAFONDS[d.key]))
+    if (communs.length) {
+      reasons.push({ dimension: d.dimension, items: communs.map((id) => label(d.map, id)) })
       piliers.add(d.pilier)
     }
   }
 
   const comps = new Set(e.competences_categories || [])
+  const positives = Object.entries(criteria.competences)
+    .filter(([, etat]) => etat !== 'ne_plus')
+    .map(([id]) => id)
+  if (positives.length) {
+    for (const t of comps) rareteMetier += poids('competences_categories', t)
+    const pCommuns = positives.filter((id) => comps.has(id)).map((id) => poids('competences_categories', id))
+    rareteCommune += pCommuns.reduce((a, b) => a + b, 0)
+    ajoute(
+      'talents',
+      sommeTop(pCommuns, PLAFONDS.competences_categories),
+      sommeTop(positives.map((id) => poids('competences_categories', id)), PLAFONDS.competences_categories),
+    )
+  }
   const utiliser = []
   const developper = []
   const nePlus = []
   for (const [id, etat] of Object.entries(criteria.competences)) {
-    if (etat !== 'ne_plus') maxPossiblePoints += POIDS_TAG
     if (!comps.has(id)) continue
     if (etat === 'utiliser') utiliser.push(label(COMPETENCES, id))
     else if (etat === 'developper') developper.push(label(COMPETENCES, id))
     else if (etat === 'ne_plus') nePlus.push(label(COMPETENCES, id))
   }
-  earnedPoints += (utiliser.length + developper.length) * POIDS_TAG
   if (utiliser.length) reasons.push({ dimension: 'Compétences que vous voulez utiliser', items: utiliser })
   if (developper.length) reasons.push({ dimension: 'Compétences que vous pourriez développer', items: developper })
   if (utiliser.length || developper.length) piliers.add('talents')
@@ -180,19 +234,19 @@ export function evaluate(metier, criteria) {
       continue
     }
 
-    const poids = POIDS_CONDITION[importance] ?? 1
-    maxPossiblePoints += poids
+    const p = POIDS_CONDITION[importance] ?? 1
     if (match) {
-      earnedPoints += poids
+      ajoute('equilibre', p, p)
       condOk.push(`${critere.libelle} : ${actual}`)
     } else if (known) {
+      ajoute('equilibre', 0, p)
       if (importance === 'indispensable') indispensableManque = true
       gaps.push(
         `${critere.libelle} : vous ${importance === 'indispensable' ? 'exigez' : 'préférez'} « ${wanted} », ce métier est plutôt « ${actual} ».`,
       )
     } else {
       // Information variable ou inconnue : moitié des points, à vérifier.
-      earnedPoints += poids / 2
+      ajoute('equilibre', p / 2, p)
       gaps.push(`${critere.libelle} : ${incertain}, à vérifier.`)
     }
   }
@@ -201,30 +255,51 @@ export function evaluate(metier, criteria) {
     piliers.add('equilibre')
   }
 
-  earnedPoints -= infractions * PENALITE
-  const rate = maxPossiblePoints ? Math.max(0, earnedPoints) / maxPossiblePoints : 0
+  const taux = Object.values(score).map((s) => s.gagne / s.max)
+  const moyenne = taux.length ? taux.reduce((a, b) => a + b, 0) / taux.length : 0
+  const rate = Math.max(0, moyenne - infractions * PENALITE)
   let stars = starsFor(rate)
   if (infractions) stars = Math.min(stars, MAX_ETOILES_SI_INFRACTION)
   if (indispensableManque) stars = Math.min(stars, MAX_ETOILES_SI_INDISPENSABLE_MANQUE)
-  return { rate, stars, reasons, gaps, piliers }
+  // Part du profil du métier couverte par vos choix : à taux égal, un métier « centré » sur vos choix passe devant.
+  const focus = rareteMetier ? rareteCommune / rareteMetier : 0
+  return { rate, stars, reasons, gaps, piliers, piliersActifs: taux.length, focus }
 }
 
+/** Nombre de piliers en commun exigé pour qu'un métier soit proposé. */
+const piliersRequis = (piliersActifs) => (piliersActifs >= PILIERS_MIN ? PILIERS_MIN : 1)
+
 /**
- * Classe les métiers (au moins 2 étoiles) ; renvoie { results, hiddenCount }.
- * hiddenCount : métiers ayant un point commun mais trop peu proches pour être affichés.
+ * Classe les métiers ; renvoie { results, hiddenCount }.
+ * - Seuls les métiers d'au moins 3 étoiles qui partagent au moins PILIERS_MIN piliers sont retenus.
+ * - S'il y en a moins d'une page (PAGE_RESULTATS), les métiers 2 étoiles complètent la liste.
+ * - À taux égal, les métiers dont le profil est le plus centré sur vos choix passent devant.
+ * `reference` : liste servant à calculer la rareté des critères (par défaut, `metiers`).
+ * hiddenCount : métiers ayant un point commun mais non proposés.
  */
-export function rank(metiers, criteria) {
+export function rank(metiers, criteria, reference = metiers) {
   if (!countCriteria(criteria)) return { results: [], hiddenCount: 0 }
-  let hiddenCount = 0
-  const results = []
+  const poids = rarete(reference)
+  let avecPointCommun = 0
+  const forts = []
+  const ouverture = []
   for (const metier of metiers) {
-    const ev = evaluate(metier, criteria)
+    const ev = evaluate(metier, criteria, poids)
     if (!ev.reasons.length) continue
-    else if (ev.stars < 2) hiddenCount++
-    else results.push({ metier, ...ev })
+    avecPointCommun++
+    if (ev.piliers.size < piliersRequis(ev.piliersActifs)) continue
+    if (ev.stars >= 3) forts.push({ metier, ...ev })
+    else if (ev.stars === 2) ouverture.push({ metier, ...ev })
   }
-  results.sort((a, b) => b.stars - a.stars || b.rate - a.rate || a.metier.intitule.localeCompare(b.metier.intitule, 'fr'))
-  return { results, hiddenCount }
+  const results = forts.length < PAGE_RESULTATS ? [...forts, ...ouverture] : forts
+  results.sort(
+    (a, b) =>
+      b.stars - a.stars ||
+      b.rate - a.rate ||
+      b.focus - a.focus ||
+      a.metier.intitule.localeCompare(b.metier.intitule, 'fr'),
+  )
+  return { results, hiddenCount: avecPointCommun - results.length }
 }
 
 const familleDe = (m) => familleOf(m.enrichi_ia?.secteurs?.[0]) || 'autre'
@@ -234,13 +309,14 @@ const familleDe = (m) => familleOf(m.enrichi_ia?.secteurs?.[0]) || 'autre'
  * en privilégiant les familles absentes des premiers résultats.
  */
 export function surprise(metiers, criteria, topResults, count = 6, random = Math.random) {
+  const poids = rarete(metiers)
   const shuffled = [...metiers].sort(() => random() - 0.5)
   const topCodes = new Set(topResults.slice(0, 10).map((r) => r.metier.code_rome))
   const topFamilles = new Set(topResults.slice(0, 10).map((r) => familleDe(r.metier)))
 
   const candidates = shuffled
     .filter((m) => !topCodes.has(m.code_rome))
-    .map((m) => ({ metier: m, ...evaluate(m, criteria) }))
+    .map((m) => ({ metier: m, ...evaluate(m, criteria, poids) }))
     // Familles moins évidentes d'abord, puis métiers ayant au moins un point commun.
     .sort(
       (a, b) =>

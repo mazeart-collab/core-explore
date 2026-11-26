@@ -12,6 +12,7 @@ import { tensionRang } from '../lib/marche'
 import {
   EMPTY_CRITERIA,
   NIVEAUX,
+  PAGE_RESULTATS,
   PILIERS,
   countCriteria,
   normalizeCriteria,
@@ -23,7 +24,6 @@ import { clean } from '../lib/text'
 import { useStoredState } from '../lib/useStoredState'
 
 const STORAGE_KEY = 'core-explore:criteres:v1'
-const PAGE_SIZE = 12
 
 /** Fusionne les critères proposés par l'API dans les critères actuels ; renvoie le nombre d'ajouts. */
 function mergeCriteria(current, incoming) {
@@ -113,11 +113,9 @@ function Chevron({ open }) {
   )
 }
 
-/** Section repliable d'un niveau d'étoiles, affichée par pages. */
-function StarGroup({ niveau, results, open, onToggle }) {
-  const [visible, setVisible] = useState(PAGE_SIZE)
+/** Section repliable d'un niveau d'étoiles. */
+function StarGroup({ niveau, results, total, open, onToggle }) {
   const id = `groupe-${niveau.etoiles}`
-  const rest = results.length - visible
   return (
     <section className="rounded-xl border border-slate-200 bg-slate-100/50">
       <h3>
@@ -130,7 +128,7 @@ function StarGroup({ niveau, results, open, onToggle }) {
         >
           <Stars count={niveau.etoiles} />
           <span className="font-semibold text-slate-900">
-            Métiers {niveau.etoiles} étoiles ({results.length})
+            Métiers {niveau.etoiles} étoiles ({total})
           </span>
           <span className="text-sm text-slate-500">{niveau.libelle}</span>
           <Chevron open={open} />
@@ -139,17 +137,10 @@ function StarGroup({ niveau, results, open, onToggle }) {
       {open && (
         <div id={id} className="px-3 pb-3 sm:px-4 sm:pb-4">
           <div className="grid gap-4 2xl:grid-cols-2">
-            {results.slice(0, visible).map((r) => (
+            {results.map((r) => (
               <ResultCard key={r.metier.code_rome} result={r} />
             ))}
           </div>
-          {rest > 0 && (
-            <div className="mt-4 text-center">
-              <button type="button" className={buttonSecondary} onClick={() => setVisible((v) => v + PAGE_SIZE)}>
-                Afficher plus ({rest} restant{rest > 1 ? 's' : ''})
-              </button>
-            </div>
-          )}
         </div>
       )}
     </section>
@@ -187,26 +178,41 @@ function ExplorerContent() {
   const [criteria, setCriteria] = useStoredState(STORAGE_KEY, EMPTY_CRITERIA, normalizeCriteria)
   const [surprises, setSurprises] = useState(null)
   const [openPanel, setOpenPanel] = useState('activites')
-  // Groupes d'étoiles repliés par l'utilisateur (le groupe 2 étoiles l'est par défaut).
-  const [closedGroups, setClosedGroups] = useState(() => new Set([2]))
+  // Groupes d'étoiles repliés par l'utilisateur.
+  const [closedGroups, setClosedGroups] = useState(() => new Set())
 
   const nbCriteria = countCriteria(criteria)
   const { ecartes } = useSelection()
   // Les métiers écartés (« Pas pour moi ») sortent des résultats actifs ; ils restent dans le panier.
   const actifs = useMemo(() => metiers.filter((m) => !ecartes[m.code_rome]), [metiers, ecartes])
   const nbEcartes = metiers.length - actifs.length
-  const { results, hiddenCount } = useMemo(() => rank(actifs, criteria), [actifs, criteria])
+  // La rareté des critères est calculée sur tous les métiers, écartés compris, pour rester stable.
+  const { results, hiddenCount } = useMemo(() => rank(actifs, criteria, metiers), [actifs, criteria, metiers])
   // « Privilégier les métiers qui recrutent » : à étoiles égales, les métiers en tension passent devant.
   const [recrutent, setRecrutent] = useStoredState('core-explore:privilegier-recrutement', false, Boolean)
   const hasMarche = useMemo(() => metiers.some((m) => m.marche_emploi && m.marche_emploi.niveau_tension !== 'inconnue'), [metiers])
+  const ordered = useMemo(
+    () =>
+      recrutent && hasMarche
+        ? [...results].sort(
+            (a, b) => b.stars - a.stars || tensionRang(a.metier) - tensionRang(b.metier) || b.rate - a.rate,
+          )
+        : results,
+    [results, recrutent, hasMarche],
+  )
+  // Résultats affichés par pages de PAGE_RESULTATS ; on revient à la première page quand la liste change.
+  const [pages, setPages] = useState({ liste: null, n: 1 })
+  const nbPages = pages.liste === results ? pages.n : 1
+  const shown = ordered.slice(0, nbPages * PAGE_RESULTATS)
+  const rest = ordered.length - shown.length
   const groups = useMemo(
     () =>
-      NIVEAUX.map((niveau) => {
-        let list = results.filter((r) => r.stars === niveau.etoiles)
-        if (recrutent && hasMarche) list = [...list].sort((a, b) => tensionRang(a.metier) - tensionRang(b.metier) || b.rate - a.rate)
-        return { niveau, results: list }
-      }).filter((g) => g.results.length),
-    [results, recrutent, hasMarche],
+      NIVEAUX.map((niveau) => ({
+        niveau,
+        results: shown.filter((r) => r.stars === niveau.etoiles),
+        total: ordered.filter((r) => r.stars === niveau.etoiles).length,
+      })).filter((g) => g.results.length),
+    [shown, ordered],
   )
 
   const pilierTags = useMemo(() => ikigaiTags(criteria), [criteria])
@@ -333,13 +339,6 @@ function ExplorerContent() {
             </section>
           )}
 
-          {!nbCriteria && (
-            <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
-              Choisissez quelques critères (ou décrivez votre métier idéal ci-dessus) : les métiers apparaîtront ici,
-              classés par étoiles, avec ce qui les relie à vos choix. Vous pouvez aussi vous laisser surprendre.
-            </p>
-          )}
-
           {nbCriteria > 0 && !results.length && (
             <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
               Essayez d’assouplir certains critères (par exemple passer un critère « Indispensable » en
@@ -352,10 +351,23 @@ function ExplorerContent() {
               key={g.niveau.etoiles}
               niveau={g.niveau}
               results={g.results}
+              total={g.total}
               open={!closedGroups.has(g.niveau.etoiles)}
               onToggle={() => toggleGroup(g.niveau.etoiles)}
             />
           ))}
+
+          {rest > 0 && (
+            <div className="text-center">
+              <button
+                type="button"
+                className={buttonSecondary}
+                onClick={() => setPages({ liste: results, n: nbPages + 1 })}
+              >
+                Voir plus de métiers ({Math.min(rest, PAGE_RESULTATS)} sur {rest} restant{rest > 1 ? 's' : ''})
+              </button>
+            </div>
+          )}
 
           {nbEcartes > 0 && (
             <p className="text-xs text-slate-500">
