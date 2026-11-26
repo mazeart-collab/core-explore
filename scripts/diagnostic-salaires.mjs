@@ -30,59 +30,25 @@ const appel = async (methode, chemin, corps) => {
   }
 }
 
-// SAL_3 : « Salaires en poste par typologie salaires (moyen / débutant / expérimenté) x caractéristiques »,
-// nomenclature TYPESALAIRE (SAL1 moins de 35 ans, SAL2 35 ans et +, SAL3 tout âge), déciles SAL_D10 / SAL_D90.
-console.log('===== Recherche du chemin de l\'indicateur SAL_3 (salaires en poste)')
-const corps = (extra = {}) => ({
-  codeTypeTerritoire: 'NAT',
-  codeTerritoire: 'FR',
-  codeTypeActivite: 'ROME',
-  codeActivite: 'M1405',
-  codeTypePeriode: 'ANNEE',
-  codeTypeNomenclature: 'TYPESALAIRE',
-  listeCodeNomenclature: ['SAL3'],
-  dernierePeriode: true,
-  sansCaracteristiques: false,
-  ...extra,
-})
-const chemins = [
-  '/indicateur/salaire-rome-fap',
-  '/indicateur/stat-salaire-rome-fap',
-  '/indicateur/stat-salaires-en-poste',
-  '/indicateur/stat-salaire-en-poste',
-  '/indicateur/stat-salaires-poste',
-  '/indicateur/stat-salaries',
-  '/indicateur/stat-salaire',
-  '/indicateur/stat-salaires',
-  '/indicateur/salaires',
-  '/indicateur/salaire',
-  '/indicateur/stat-remunerations',
-  '/indicateur/SAL_3',
-  '/indicateur/sal-3',
+// SAL_3 : « Salaires en poste » → POST /indicateur/stat-salaires-en-poste (chemin confirmé le 26/11/2026).
+// Nomenclature TYPESALAIRE (SAL1 moins de 35 ans, SAL2 35 ans et +, SAL3 tout âge), déciles SAL_D10 / SAL_D90.
+console.log('===== Variantes de requête pour stat-salaires-en-poste')
+const base = { codeTypeTerritoire: 'NAT', codeTerritoire: 'FR', codeTypeActivite: 'ROME', codeActivite: 'M1405' }
+const variantes = [
+  ['A. tout, sans filtre de nomenclature', { ...base, codeTypeNomenclature: 'TYPESALAIRE', sansCaracteristiques: false }],
+  ['B. sans période ni nomenclature', { ...base }],
+  ['C. période ANNEE, toutes périodes', { ...base, codeTypePeriode: 'ANNEE', codeTypeNomenclature: 'TYPESALAIRE', dernierePeriode: false }],
+  ['D. période TRIMESTRE', { ...base, codeTypePeriode: 'TRIMESTRE', codeTypeNomenclature: 'TYPESALAIRE', dernierePeriode: true }],
+  ['E. Infirmier J1506', { ...base, codeActivite: 'J1506', codeTypeNomenclature: 'TYPESALAIRE' }],
+  ['F. Maçon F1703', { ...base, codeActivite: 'F1703', codeTypeNomenclature: 'TYPESALAIRE' }],
+  ['G. Paris (DEP 75), M1405', { ...base, codeTypeTerritoire: 'DEP', codeTerritoire: '75', codeTypeNomenclature: 'TYPESALAIRE' }],
+  ['H. toutes activités (CUMUL)', { ...base, codeTypeActivite: 'CUMUL', codeActivite: 'CUMUL', codeTypeNomenclature: 'TYPESALAIRE' }],
+  ['I. activité FAP', { ...base, codeTypeActivite: 'FAP', codeActivite: 'M2Z90', codeTypeNomenclature: 'TYPESALAIRE' }],
 ]
-for (const chemin of chemins) {
-  const r = await appel('POST', chemin, corps())
-  const resume = r.json ? JSON.stringify(r.json) : r.texte
-  console.log(`${chemin} → HTTP ${r.status} ${r.status === 404 && /Could not find resource/.test(resume) ? '(chemin inexistant)' : resume.slice(0, 3000)}`)
+for (const [nom, corps] of variantes) {
+  const r = await appel('POST', '/indicateur/stat-salaires-en-poste', corps)
+  const t = r.json ? JSON.stringify(r.json) : r.texte
+  console.log(`--- ${nom} → HTTP ${r.status}`)
+  console.log(t.slice(0, 2500))
   await new Promise((res) => setTimeout(res, 200))
 }
-console.log('')
-console.log('===== 1. Liste des indicateurs')
-const ind = await appel('GET', '/referentiel/indicateurs')
-for (const i of ind.json?.indicateurs || []) console.log(`${i.codeIndicateur} | ${i.libelleIndicateur}`)
-
-console.log('\n===== 2. Caractéristiques de type salaire dans le référentiel')
-const car = await appel('GET', '/referentiel/caracteristiques')
-for (const c of car.json?.caracteristiques || []) {
-  if (/SAL/i.test(c.codeTypeCaracteristique) || /salaire|rémun/i.test(c.libelleCaracteristique))
-    console.log(`${c.codeTypeCaracteristique} | ${c.codeCaracteristique} | ${c.libelleCaracteristique}`)
-}
-
-console.log('\n===== 3. Nomenclatures liées au salaire')
-const nom = await appel('GET', '/referentiel/nomenclatures')
-for (const n of nom.json?.nomenclatures || []) {
-  if (/SAL/i.test(n.codeTypeNomenclature) || /salaire|rémun/i.test(n.libelleNomenclature))
-    console.log(`${n.codeTypeNomenclature} | ${n.codeNomenclature} | ${n.libelleNomenclature}`)
-}
-console.log('Types de nomenclature existants :', [...new Set((nom.json?.nomenclatures || []).map((n) => n.codeTypeNomenclature))].join(', '))
-
