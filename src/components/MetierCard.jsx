@@ -28,6 +28,7 @@ const ICONES = {
   lieu: 'M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
   teletravail: 'M3 11 12 4l9 7M5 10v10h14V10',
   horaires: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  salaire: 'M17 6.5A6 6 0 1 0 17 17.5M4 10h9M4 14h9',
 }
 
 /** Repères essentiels d'un métier (accès, lieu, télétravail, horaires, recrutement). */
@@ -40,7 +41,7 @@ export function Reperes({ metier }) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-slate-400" aria-hidden="true">
             <path d={ICONES[r.id]} />
           </svg>
-          {r.id === 'niveau' ? <span><span className="sr-only">Niveau d’accès : </span>{r.libelle}</span> : r.libelle}
+          {r.id === 'niveau' ? <span><span className="sr-only">Niveau d’accès : </span>{r.libelle}</span> : r.id === 'salaire' ? <span><span className="sr-only">Salaire proposé : </span>{r.libelle}</span> : r.libelle}
         </li>
       ))}
       <li>

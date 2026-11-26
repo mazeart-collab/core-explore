@@ -20,6 +20,31 @@ export function TensionBadge({ metier, niveau }) {
 
 const fmt = (n) => Number(n).toLocaleString('fr-FR')
 
+/** « 1 900 – 2 400 € », ou le montant seul quand la tranche est resserrée. */
+function trancheSalaire(s) {
+  if (!s?.min || !s?.max) return null
+  return s.min === s.max ? `${fmt(s.min)} €` : `${fmt(s.min)} – ${fmt(s.max)} €`
+}
+
+/** Tranche de salaire des offres France Travail (chiffres nationaux). */
+function Salaire({ salaire }) {
+  const t = trancheSalaire(salaire)
+  if (!t) return null
+  return (
+    <div className="rounded-lg bg-amber-50 p-4 ring-1 ring-amber-200">
+      <p className="text-xs text-slate-600">Salaire proposé dans les offres (France entière)</p>
+      <p className="mt-1 text-xl font-semibold text-slate-900">
+        {t} <span className="text-sm font-normal text-slate-600">brut par mois</span>
+      </p>
+      <p className="mt-1 text-xs text-slate-600">
+        La moitié des {fmt(salaire.nb_offres)} offres récentes qui affichent un salaire se situe dans cette tranche
+        (temps plein, salaire médian {fmt(salaire.mediane)} €). Le salaire varie selon l’expérience, la région et
+        l’employeur.
+      </p>
+    </div>
+  )
+}
+
 function Bouton({ href, children, primary }) {
   return (
     <a
@@ -102,6 +127,10 @@ export function MarcheLocal({ metier }) {
             ))}
           </select>
         </label>
+      </div>
+
+      <div className="mt-4">
+        <Salaire salaire={national?.salaire} />
       </div>
 
       {local.statut === 'chargement' && (

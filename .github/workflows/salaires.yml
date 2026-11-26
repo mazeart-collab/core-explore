@@ -1,0 +1,60 @@
+name: "4. Mettre à jour les salaires"
+
+on:
+  workflow_dispatch:
+    inputs:
+      limite:
+        description: "Nombre de métiers à interroger (vide = tous, environ 11 minutes). Ex. 20 pour un essai rapide."
+        type: string
+        default: ""
+      codes:
+        description: "Codes ROME précis, séparés par des virgules (facultatif). Ex. A1101,M1805"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  salaires:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Calculer les tranches de salaire (offres France Travail)
+        env:
+          FRANCE_TRAVAIL_CLIENT_ID: ${{ secrets.FRANCE_TRAVAIL_CLIENT_ID }}
+          FRANCE_TRAVAIL_CLIENT_SECRET: ${{ secrets.FRANCE_TRAVAIL_CLIENT_SECRET }}
+          LIMITE: ${{ inputs.limite }}
+          CODES: ${{ inputs.codes }}
+        run: npm run data:salaires
+
+      - name: Enregistrer metiers.json
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/metiers.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement à enregistrer."
+            exit 0
+          fi
+          git commit -m "Données : salaires des offres France Travail ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"

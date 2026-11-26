@@ -1,5 +1,5 @@
 // Repères courts d'un métier, affichés sur les cartes (à la place de l'extrait de description)
-// et en tête de fiche : niveau d'accès, lieu de travail, télétravail, horaires.
+// et en tête de fiche : niveau d'accès, lieu de travail, télétravail, horaires, salaire.
 import { clean } from './text'
 
 // Niveaux reconnus dans le texte « Accès au métier » du ROME, du plus bas au plus haut.
@@ -38,5 +38,10 @@ export function reperes(metier) {
   if (LIEU[ct.bureau_terrain]) out.push({ id: 'lieu', libelle: LIEU[ct.bureau_terrain] })
   if (TELETRAVAIL[ct.teletravail]) out.push({ id: 'teletravail', libelle: TELETRAVAIL[ct.teletravail] })
   if (HORAIRES[ct.horaires]) out.push({ id: 'horaires', libelle: HORAIRES[ct.horaires] })
+  const s = metier.marche_emploi?.salaire
+  if (s?.min && s?.max) {
+    const k = (n) => `${(Math.round(n / 100) / 10).toLocaleString('fr-FR')} k€`
+    out.push({ id: 'salaire', libelle: s.min === s.max ? `${k(s.min)} brut/mois` : `${k(s.min)} – ${k(s.max)} brut/mois` })
+  }
   return out
 }
