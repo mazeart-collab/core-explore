@@ -4,6 +4,7 @@ import { buttonPrimary, buttonSecondary } from '../components/ui'
 export default function Home() {
   return (
     <div className="mx-auto max-w-3xl py-8 text-center sm:py-16">
+      <img src="/logo-core.svg" alt="CORE – Bilans, ateliers, retraites" className="mx-auto mb-10 h-24 w-auto sm:h-32" />
       <h1 className="text-3xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl">
         Et si votre avenir professionnel avait plus de possibilités que vous ne l’imaginez&nbsp;?
       </h1>

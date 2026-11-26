@@ -1,1 +1,96 @@
 @import "tailwindcss";
+@import "@fontsource-variable/montserrat";
+
+/*
+ * Charte CORE : vert profond #1f3937, terracotta #c0735d, jaune soleil #ffe684,
+ * tons sable et sauge de l'illustration « Avant la suite, il y a aujourd'hui ».
+ * Les nuances Tailwind utilisées dans le code (teal, slate, rose, amber, sky, emerald)
+ * sont redéfinies ici : tout le site prend les couleurs de la charte sans toucher aux composants.
+ */
+
+/* Polices sous licence : fichiers à déposer dans public/fonts (voir LISEZMOI.md). */
+@font-face {
+  font-family: 'Hagrid';
+  src: url('/fonts/Hagrid.woff2') format('woff2');
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Agrandir';
+  src: url('/fonts/Agrandir.woff2') format('woff2');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Montserrat Variable', 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Hagrid', 'Montserrat Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Agrandir', 'Montserrat Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Couleur principale (boutons, liens) : vert profond du logo */
+  --color-teal-50: #eef3f1;
+  --color-teal-100: #d7e3df;
+  --color-teal-200: #b0c7c0;
+  --color-teal-300: #86a89f;
+  --color-teal-400: #5d877d;
+  --color-teal-500: #416c63;
+  --color-teal-600: #2f5650;
+  --color-teal-700: #1f3937;
+  --color-teal-800: #172c2a;
+  --color-teal-900: #10201e;
+
+  /* Neutres chauds (sable) ; les textes les plus foncés reprennent le vert du logo */
+  --color-slate-50: #faf4ec;
+  --color-slate-100: #f3e8da;
+  --color-slate-200: #e7d7c4;
+  --color-slate-300: #d5bfa8;
+  --color-slate-400: #ab967f;
+  --color-slate-500: #7b6a5a;
+  --color-slate-600: #5e5348;
+  --color-slate-700: #474139;
+  --color-slate-800: #2f3532;
+  --color-slate-900: #1f3937;
+
+  /* Terracotta (favoris, ce que j'aime, suppressions) */
+  --color-rose-50: #fbf0eb;
+  --color-rose-100: #f5dccf;
+  --color-rose-200: #ebc0ad;
+  --color-rose-300: #dca08a;
+  --color-rose-500: #c0735d;
+  --color-rose-600: #a95f4a;
+  --color-rose-700: #8f4d3b;
+  --color-rose-800: #733e30;
+
+  /* Jaune soleil / ocre (repères IA, sens) */
+  --color-amber-50: #fff8e1;
+  --color-amber-100: #fff0bd;
+  --color-amber-200: #ffe684;
+  --color-amber-700: #8a6514;
+  --color-amber-800: #6f5110;
+  --color-amber-900: #573f0c;
+
+  /* Sauge (marché qui recrute, équilibre) */
+  --color-emerald-50: #f0f2ea;
+  --color-emerald-200: #c9d1b6;
+  --color-emerald-700: #55633f;
+  --color-emerald-800: #444f32;
+
+  /* Ocre doux (marché équilibré, talents) */
+  --color-sky-50: #fbf1e4;
+  --color-sky-200: #ecc9a0;
+  --color-sky-700: #8d5a26;
+  --color-sky-800: #71481e;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+  h1 {
+    font-family: var(--font-display);
+  }
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+  }
+}

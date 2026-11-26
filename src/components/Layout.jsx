@@ -51,8 +51,9 @@ function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur print:hidden">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link to="/" className="whitespace-nowrap text-lg font-semibold tracking-tight text-slate-900">
-          CORE <span className="text-teal-700">Explore</span>
+        <Link to="/" className="flex items-end gap-2 whitespace-nowrap" aria-label="CORE Explore, accueil">
+          <img src="/logo-core-mark.svg" alt="" className="h-9 w-auto" />
+          <span className="pb-0.5 font-heading text-lg font-semibold tracking-tight text-rose-500">Explore</span>
         </Link>
         <div className="flex items-center gap-2">
         <nav className="hidden lg:block" aria-label="Navigation principale">
