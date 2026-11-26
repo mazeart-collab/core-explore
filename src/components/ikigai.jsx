@@ -2,10 +2,10 @@ import { PILIERS } from '../lib/matching'
 
 /** Couleurs et icônes des 4 piliers de l'Ikigai. */
 const PILIER_STYLE = {
-  aime: { color: '#e11d48', soft: 'bg-rose-50 text-rose-700 ring-rose-200' },
-  talents: { color: '#0284c7', soft: 'bg-sky-50 text-sky-700 ring-sky-200' },
-  sens: { color: '#d97706', soft: 'bg-amber-50 text-amber-700 ring-amber-200' },
-  equilibre: { color: '#059669', soft: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
+  aime: { color: '#c0735d', soft: 'bg-rose-50 text-rose-700 ring-rose-200' },
+  talents: { color: '#1f3937', soft: 'bg-teal-50 text-teal-700 ring-teal-200' },
+  sens: { color: '#b8862b', soft: 'bg-amber-50 text-amber-700 ring-amber-200' },
+  equilibre: { color: '#6b7a4f', soft: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
 }
 
 export function PilierIcon({ id, size = 16, className = '' }) {
@@ -190,7 +190,7 @@ export function IkigaiDiagram({ tags, onSelect }) {
               <circle cx={c.cx} cy={c.cy} r={R} fill="transparent" stroke={PILIER_STYLE[p.id].color} strokeOpacity="0" />
               <foreignObject x={c.zone.x} y={c.zone.y} width={c.zone.w} height={c.zone.h}>
                 <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
-                  <p className="flex items-center gap-1.5 text-[15px] font-semibold" style={{ color: on ? PILIER_STYLE[p.id].color : '#64748b' }}>
+                  <p className="flex items-center gap-1.5 text-[15px] font-semibold" style={{ color: on ? PILIER_STYLE[p.id].color : '#7b6a5a' }}>
                     <PilierIcon id={p.id} size={15} />
                     {p.libelle}
                   </p>
@@ -200,8 +200,8 @@ export function IkigaiDiagram({ tags, onSelect }) {
             </g>
           )
         })}
-        <circle cx={CX} cy={CY} r={nbActive === 4 ? 30 : 24} fill="white" stroke={nbActive === 4 ? '#0f766e' : '#cbd5e1'} strokeWidth="2" />
-        <text x={CX} y={CY + 4} textAnchor="middle" fontSize="11" fontWeight="600" fill={nbActive === 4 ? '#0f766e' : '#94a3b8'}>
+        <circle cx={CX} cy={CY} r={nbActive === 4 ? 30 : 24} fill="white" stroke={nbActive === 4 ? '#1f3937' : '#d5bfa8'} strokeWidth="2" />
+        <text x={CX} y={CY + 4} textAnchor="middle" fontSize="11" fontWeight="600" fill={nbActive === 4 ? '#1f3937' : '#ab967f'}>
           Vos pistes
         </text>
       </svg>
@@ -217,11 +217,11 @@ export function IkigaiDiagram({ tags, onSelect }) {
                 onClick={() => onSelect(p.id)}
                 className="flex h-full w-full flex-col items-center gap-1.5 rounded-2xl border-2 p-3 text-center"
                 style={{
-                  borderColor: on ? PILIER_STYLE[p.id].color : '#e2e8f0',
+                  borderColor: on ? PILIER_STYLE[p.id].color : '#e7d7c4',
                   backgroundColor: on ? `${PILIER_STYLE[p.id].color}12` : 'white',
                 }}
               >
-                <span className="flex items-center gap-1 text-sm font-semibold" style={{ color: on ? PILIER_STYLE[p.id].color : '#64748b' }}>
+                <span className="flex items-center gap-1 text-sm font-semibold" style={{ color: on ? PILIER_STYLE[p.id].color : '#7b6a5a' }}>
                   <PilierIcon id={p.id} size={14} />
                   {p.libelle}
                 </span>
@@ -244,8 +244,8 @@ export function Stars({ count, className = '' }) {
         <svg key={i} width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"
-            fill={i <= count ? '#f59e0b' : 'none'}
-            stroke={i <= count ? '#f59e0b' : '#cbd5e1'}
+            fill={i <= count ? '#e0a83a' : 'none'}
+            stroke={i <= count ? '#e0a83a' : '#d5bfa8'}
             strokeWidth="1.5"
             strokeLinejoin="round"
           />

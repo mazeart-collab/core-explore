@@ -2,20 +2,11 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import JourneeType from '../components/JourneeType'
 import { MarcheLocal } from '../components/Marche'
-import { SecteursTags } from '../components/MetierCard'
+import { Reperes, SecteursTags } from '../components/MetierCard'
 import SelectionButtons from '../components/SelectionButtons'
 import { DataGate, Tag } from '../components/ui'
 import { useMetiers } from '../lib/MetiersContext'
-import {
-  ACTIVITES,
-  CENTRES_INTERET,
-  CRITERES,
-  MOTIVATIONS,
-  SENS,
-  UNIVERS,
-  conditionLabel,
-  label,
-} from '../lib/taxonomies'
+import { CRITERES, MOTIVATIONS, SENS, conditionLabel, label } from '../lib/taxonomies'
 import { clean, normalize } from '../lib/text'
 
 function Section({ title, children }) {
@@ -107,63 +98,71 @@ function Officiel({ o }) {
           <Paragraphs text={o.definition} />
         </Section>
       )}
-      {appellations.length > 0 && (
-        <Section title="Autres appellations">
-          <ExpandableList items={appellations} initial={10} />
-        </Section>
-      )}
       {o.acces_metier && (
         <Section title="Accès au métier et formations">
           <Paragraphs text={o.acces_metier} />
         </Section>
       )}
-      {o.activites_rome?.length > 0 && (
-        <Section title="Activités">
-          <ExpandableList items={o.activites_rome} />
-        </Section>
-      )}
-      {(savoirs.length > 0 || savoirEtre.length > 0) && (
-        <Section title="Compétences et savoirs">
-          {savoirEtre.length > 0 && (
-            <>
-              <h4 className="mb-1 text-sm font-medium text-slate-600">Savoir-être professionnels</h4>
-              <ExpandableList items={savoirEtre} />
-            </>
+      <details className="group border-t border-slate-100 pt-5">
+        <summary className="cursor-pointer list-none font-semibold text-teal-700 hover:underline">
+          <span className="group-open:hidden">Voir le détail du référentiel (activités, compétences, contextes…)</span>
+          <span className="hidden group-open:inline">Masquer le détail du référentiel</span>
+        </summary>
+        <div className="mt-5 space-y-5">
+          {appellations.length > 0 && (
+            <Section title="Autres appellations">
+              <ExpandableList items={appellations} initial={10} />
+            </Section>
           )}
-          {savoirs.length > 0 && (
-            <>
-              <h4 className="mb-1 mt-3 text-sm font-medium text-slate-600 first:mt-0">Savoirs</h4>
-              <ExpandableList items={savoirs} />
-            </>
+          {o.activites_rome?.length > 0 && (
+            <Section title="Activités">
+              <ExpandableList items={o.activites_rome} />
+            </Section>
           )}
-        </Section>
-      )}
-      {contextes.length > 0 && (
-        <Section title="Contextes de travail">
-          <div className="space-y-3">
-            {groupBy(contextes, 'type').map(([type, items]) => (
-              <div key={type}>
-                <h4 className="mb-1 text-sm font-medium text-slate-600">{clean(type)}</h4>
-                <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
-                  {items.map((c, i) => (
-                    <li key={i}>{clean(c.libelle)}</li>
-                  ))}
-                </ul>
+          {(savoirs.length > 0 || savoirEtre.length > 0) && (
+            <Section title="Compétences et savoirs">
+              {savoirEtre.length > 0 && (
+                <>
+                  <h4 className="mb-1 text-sm font-medium text-slate-600">Savoir-être professionnels</h4>
+                  <ExpandableList items={savoirEtre} />
+                </>
+              )}
+              {savoirs.length > 0 && (
+                <>
+                  <h4 className="mb-1 mt-3 text-sm font-medium text-slate-600 first:mt-0">Savoirs</h4>
+                  <ExpandableList items={savoirs} />
+                </>
+              )}
+            </Section>
+          )}
+          {contextes.length > 0 && (
+            <Section title="Contextes de travail">
+              <div className="space-y-3">
+                {groupBy(contextes, 'type').map(([type, items]) => (
+                  <div key={type}>
+                    <h4 className="mb-1 text-sm font-medium text-slate-600">{clean(type)}</h4>
+                    <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                      {items.map((c, i) => (
+                        <li key={i}>{clean(c.libelle)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </Section>
-      )}
-      {o.centres_interet_rome?.length > 0 && (
-        <Section title="Centres d’intérêt associés">
-          <ExpandableList items={o.centres_interet_rome} />
-        </Section>
-      )}
-      {o.secteurs_activite_rome?.length > 0 && (
-        <Section title="Secteurs d’activité">
-          <ExpandableList items={o.secteurs_activite_rome} />
-        </Section>
-      )}
+            </Section>
+          )}
+          {o.centres_interet_rome?.length > 0 && (
+            <Section title="Centres d’intérêt associés">
+              <ExpandableList items={o.centres_interet_rome} />
+            </Section>
+          )}
+          {o.secteurs_activite_rome?.length > 0 && (
+            <Section title="Secteurs d’activité">
+              <ExpandableList items={o.secteurs_activite_rome} />
+            </Section>
+          )}
+        </div>
+      </details>
       {(o.emploi_reglemente || o.emploi_cadre) && (
         <div className="flex flex-wrap gap-2">
           {o.emploi_reglemente && <Tag>Emploi réglementé</Tag>}
@@ -175,7 +174,7 @@ function Officiel({ o }) {
 }
 
 function TagList({ ids, map }) {
-  if (!ids?.length) return <p className="text-sm text-slate-500">Non renseigné</p>
+  if (!ids?.length) return null
   return (
     <div className="flex flex-wrap gap-1.5">
       {ids.map((id) => (
@@ -185,9 +184,16 @@ function TagList({ ids, map }) {
   )
 }
 
+// Conditions de travail montrées d'emblée ; les autres sont derrière « Voir toutes les conditions ».
+const CONDITIONS_CLES = ['bureau_terrain', 'teletravail', 'horaires', 'rythme', 'activite_physique', 'relations_humaines']
+
 function Enrichi({ e }) {
+  const [toutes, setToutes] = useState(false)
   if (!e) return null
-  const conditions = CRITERES.map((c) => [c, e.conditions_travail?.[c.id]]).filter(([, v]) => v !== null && v !== undefined)
+  const conditions = CRITERES.map((c) => [c, e.conditions_travail?.[c.id]])
+    .filter(([, v]) => v !== null && v !== undefined)
+    .filter(([c]) => toutes || CONDITIONS_CLES.includes(c.id))
+  const nbConditions = CRITERES.filter((c) => e.conditions_travail?.[c.id] != null).length
   return (
     <div className="space-y-5 rounded-xl border border-amber-200 bg-amber-50/40 p-5 sm:p-6">
       <div>
@@ -199,9 +205,6 @@ function Enrichi({ e }) {
           Proposés automatiquement à partir des données officielles : ils peuvent contenir des approximations.
         </p>
       </div>
-      <Section title="Univers professionnels">
-        <TagList ids={e.secteurs} map={UNIVERS} />
-      </Section>
       {conditions.length > 0 && (
         <Section title="Conditions de travail habituelles">
           <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
@@ -212,6 +215,11 @@ function Enrichi({ e }) {
               </div>
             ))}
           </dl>
+          {nbConditions > CONDITIONS_CLES.length && (
+            <button type="button" onClick={() => setToutes((t) => !t)} className="mt-2 text-sm font-medium text-teal-700 hover:underline">
+              {toutes ? 'Voir moins' : `Voir toutes les conditions (${nbConditions})`}
+            </button>
+          )}
         </Section>
       )}
       {e.points_vigilance?.length > 0 && (
@@ -223,18 +231,16 @@ function Enrichi({ e }) {
           </ul>
         </Section>
       )}
-      <Section title="Activités">
-        <TagList ids={e.activites} map={ACTIVITES} />
-      </Section>
-      <Section title="Centres d’intérêt">
-        <TagList ids={e.centres_interet} map={CENTRES_INTERET} />
-      </Section>
-      <Section title="Ce qui peut donner du sens">
-        <TagList ids={e.sens_causes} map={SENS} />
-      </Section>
-      <Section title="Motivations">
-        <TagList ids={e.motivations} map={MOTIVATIONS} />
-      </Section>
+      {e.sens_causes?.length > 0 && (
+        <Section title="Ce qui peut donner du sens">
+          <TagList ids={e.sens_causes} map={SENS} />
+        </Section>
+      )}
+      {e.motivations?.length > 0 && (
+        <Section title="Ce que ce métier peut apporter">
+          <TagList ids={e.motivations} map={MOTIVATIONS} />
+        </Section>
+      )}
     </div>
   )
 }
@@ -281,6 +287,7 @@ function MetierContent() {
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">{clean(o.intitule)}</h1>
         <SecteursTags metier={metier} />
+        <Reperes metier={metier} />
         <div className="flex flex-wrap items-center gap-3">
           <MetierScopeButton href={o.lien_metierscope} />
           <SelectionButtons metier={metier} size="lg" />

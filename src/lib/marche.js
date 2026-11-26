@@ -46,8 +46,10 @@ export function intituleSimple(intitule) {
   return `${gauche.trim()} ${suite}`.trim()
 }
 
-/** Recherche de formations sur Mon Compte Formation, pré-remplie avec l'intitulé du métier. */
-export function lienFormations(intitule) {
-  const q = JSON.stringify({ quoi: intituleSimple(intitule) })
-  return `https://www.moncompteformation.gouv.fr/espace-prive/html/#/formation/recherche/resultats?q=${encodeURIComponent(q)}`
+/**
+ * Recherche de formations France Travail pour un code ROME (page publique, sans connexion),
+ * plutôt que Mon Compte Formation qui renvoie vers son accueil quand on n'est pas connecté.
+ */
+export function lienFormations(codeRome) {
+  return `https://candidat.francetravail.fr/formations/recherche?${new URLSearchParams({ quoi: codeRome })}`
 }
