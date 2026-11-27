@@ -4,8 +4,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/parse-intent.js": {
-      "includeFiles": "data/taxonomies.json",
+    "api/analyser-pitch.js": {
       "maxDuration": 30
     },
     "api/marche.js": {

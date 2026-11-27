@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { analyserPitch, countPropositions } from '../../lib/portrait/pitch'
+import { analyseIA, analyseLocale, analyserPitch, countPropositions } from '../../lib/portrait/pitch'
+import { useStoredState } from '../../lib/useStoredState'
 import { CHOIX, CONTRIBUTIONS_BY_ID, CURSEURS, INTERETS_BY_ID, MOTIVATIONS_BY_ID, SAVOIRS, VERBES } from '../../lib/portrait/referentiel'
 import { buttonPrimary, buttonSecondary } from '../ui'
 import { Pastille } from './controls'
@@ -54,10 +55,15 @@ export default function PitchBox({ portrait, setPortrait, onDone }) {
   const [retenues, setRetenues] = useState(new Set())
   const [etats, setEtats] = useState({})
   const [ajoute, setAjoute] = useState(false)
+  const [chargement, setChargement] = useState(false)
+  // Choix mémorisé sur l'appareil : analyse par IA (texte envoyé) ou sur l'appareil uniquement.
+  const [sansIA, setSansIA] = useStoredState('core-explore:pitch-sans-ia', false, Boolean)
 
   async function analyser(e) {
     e.preventDefault()
-    const res = await analyserPitch(texte)
+    setChargement(true)
+    const res = await analyserPitch(texte, { fournisseur: sansIA ? analyseLocale : analyseIA })
+    setChargement(false)
     setPr(res)
     setRetenues(new Set(cles(res)))
     setEtats({})
@@ -100,12 +106,24 @@ export default function PitchBox({ portrait, setPortrait, onDone }) {
           placeholder={`Par exemple : « ${EXEMPLE} »`}
           className="w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
         />
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-slate-500">
-            L’analyse se fait sur votre appareil : votre texte n’est envoyé à aucun service extérieur.
-          </p>
-          <button type="submit" className={buttonPrimary} disabled={!texte.trim()}>
-            Analyser ma description
+        <div className="rounded-xl bg-white/70 px-3 py-2 text-xs text-slate-600">
+          {sansIA ? (
+            <p>Votre texte est analysé sur votre appareil, sans être envoyé à aucun service extérieur. L’analyse est plus sommaire.</p>
+          ) : (
+            <p>
+              Pour être mieux compris, votre texte est envoyé à un service d’intelligence artificielle (Claude, d’Anthropic), qui le traduit
+              en critères. Il n’est pas conservé par CORE Explore. Évitez d’y indiquer des informations personnelles ou sensibles (nom,
+              santé, coordonnées…).
+            </p>
+          )}
+          <label className="mt-1.5 flex items-center gap-2 font-medium text-slate-700">
+            <input type="checkbox" checked={sansIA} onChange={(e) => setSansIA(e.target.checked)} className="h-4 w-4 accent-teal-700" />
+            Analyser sur mon appareil uniquement, sans intelligence artificielle
+          </label>
+        </div>
+        <div className="flex justify-end">
+          <button type="submit" className={buttonPrimary} disabled={!texte.trim() || chargement}>
+            {chargement ? 'Analyse en cours…' : 'Analyser ma description'}
           </button>
         </div>
       </form>
@@ -121,6 +139,12 @@ export default function PitchBox({ portrait, setPortrait, onDone }) {
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-slate-900">Voici ce que nous avons compris</h3>
+                {pr.resume && <p className="mt-1 text-sm italic text-slate-700">« {pr.resume} »</p>}
+                {pr.source === 'locale' && !sansIA && (
+                  <p className="mt-1 text-xs text-slate-500">
+                    L’analyse par intelligence artificielle n’est pas disponible pour le moment : votre texte a été analysé sur votre appareil.
+                  </p>
+                )}
                 <p className="text-sm text-slate-600">
                   Décochez ce qui ne vous correspond pas. Rien n’est ajouté à votre portrait sans votre accord.
                 </p>

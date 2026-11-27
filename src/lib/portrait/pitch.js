@@ -159,13 +159,36 @@ export function analyseLocale(texte) {
 }
 
 /**
+ * Fournisseur IA : /api/analyser-pitch (Claude). Le texte est envoyé à un service externe :
+ * la page en informe la personne avant l'envoi. Lève une erreur si le service est indisponible
+ * (clé absente, réseau…) : l'appelant revient alors à l'analyse locale.
+ */
+export async function analyseIA(texte) {
+  const r = await fetch('/api/analyser-pitch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: texte }),
+  })
+  const data = await r.json().catch(() => null)
+  if (!r.ok || !data?.propositions) throw new Error(data?.error || `HTTP ${r.status}`)
+  return { ...data.propositions, resume: data.resume || '' }
+}
+
+/**
  * Analyse un pitch et renvoie des critères proposés (identifiants du référentiel), à faire confirmer.
  * `fournisseur` : fonction (texte) => propositions | Promise<propositions>. Par défaut : analyse locale.
  */
 export async function analyserPitch(texte, { fournisseur = analyseLocale } = {}) {
-  const vide = { aime: [], savoirs: [], interets: [], sens: [], motivations: [], curseurs: {}, choix: {} }
-  if (!texte?.trim()) return vide
-  return { ...vide, ...(await fournisseur(texte)) }
+  const vide = { aime: [], savoirs: [], interets: [], sens: [], motivations: [], curseurs: {}, choix: {}, resume: '' }
+  if (!texte?.trim()) return { ...vide, source: 'locale' }
+  if (fournisseur !== analyseLocale) {
+    try {
+      return { ...vide, ...(await fournisseur(texte)), source: 'ia' }
+    } catch {
+      // Service indisponible : analyse locale, sans rien envoyer.
+    }
+  }
+  return { ...vide, ...analyseLocale(texte), source: 'locale' }
 }
 
 /** Nombre de propositions. */

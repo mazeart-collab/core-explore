@@ -14,7 +14,7 @@ Application web d'exploration des métiers (React + Vite + Tailwind CSS), constr
 
 Le référentiel du portrait (identifiants, synonymes, correspondances avec les étiquettes des métiers) est dans `src/lib/portrait/referentiel.js` ; l'analyse du pitch, sans service externe, dans `src/lib/portrait/pitch.js` (un fournisseur IA pourra s'y brancher) ; le moteur de recherche dans `src/lib/portrait/moteur.js` (pondération ajustable `POIDS`, jamais affichée). Tests : `npm test` (dont les tests 1 à 8 du brief, sur la vraie base métiers).
 
-La fonction serveur `api/parse-intent.js` (plus utilisée par la page depuis la refonte du portrait) (Vercel) traduit une phrase libre en critères avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`).
+La fonction serveur `api/analyser-pitch.js` (Vercel) traduit la description libre du mode « Je décris mon projet » en critères du portrait, avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`). Sans clé `ANTHROPIC_API_KEY`, ou si le service ne répond pas, la page analyse le texte sur l’appareil (mots-clés, synonymes, négations). Le texte n’est jamais journalisé.
 
 ## Déploiement sur Vercel
 

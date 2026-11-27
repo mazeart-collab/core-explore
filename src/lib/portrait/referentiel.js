@@ -5,7 +5,7 @@
 // - `mots` : formes et synonymes reconnus dans un pitch ou une recherche (texte normalisé,
 //   sans accents ; un mot terminé par « * » est un préfixe).
 // La richesse est dans ces correspondances, pas dans le nombre de boutons affichés.
-import { normalize } from '../text'
+import { normalize } from '../text.js'
 
 /** Identifiant lisible et stable à partir d'un libellé. */
 export const slug = (s) =>
