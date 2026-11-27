@@ -415,6 +415,17 @@ export function evaluer(metier, prep) {
 
 export const SEUIL_PERTINENT = 0.55
 export const SEUIL_EXPLORER = 0.35
+
+/**
+ * Étoiles affichées (1 à 5) : traduction du score interne, jamais de pourcentage.
+ * Une condition indispensable non respectée plafonne à 2 étoiles ; une vigilance à 4.
+ */
+export function etoiles(r) {
+  let n = r.score >= 0.85 ? 5 : r.score >= 0.7 ? 4 : r.score >= SEUIL_PERTINENT ? 3 : r.score >= SEUIL_EXPLORER ? 2 : 1
+  if (r.incompatibilites?.length) n = Math.min(n, 2)
+  else if (r.vigilance?.length) n = Math.min(n, 4)
+  return n
+}
 const TAILLE_PERTINENTES = 12
 const MAX_PAR_FAMILLE = 3
 const TAILLE_DECOUVERTES = 6

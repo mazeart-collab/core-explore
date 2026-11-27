@@ -120,3 +120,16 @@ describe('moteur du portrait : tests du brief', () => {
     expect(strict.tous.every((x) => !x.exclu)).toBe(true)
   })
 })
+
+describe('étoiles', () => {
+  it('1 à 5 étoiles, plafonnées en cas d’incompatibilité', async () => {
+    const { etoiles } = await import('./moteur')
+    const r = rechercher(metiers, portrait({ aime: ['concevoir', 'organiser'] }), { elargi: true })
+    const n = r.tous.map(etoiles)
+    expect(Math.min(...n)).toBeGreaterThanOrEqual(1)
+    expect(Math.max(...n)).toBeLessThanOrEqual(5)
+    expect(new Set(r.pertinentes.map(etoiles)).size).toBeGreaterThan(0)
+    expect(etoiles({ score: 0.95, incompatibilites: ['x'], vigilance: [] })).toBe(2)
+    expect(etoiles({ score: 0.95, incompatibilites: [], vigilance: [] })).toBe(5)
+  })
+})

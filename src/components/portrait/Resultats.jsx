@@ -3,10 +3,11 @@ import { Link } from 'react-router'
 import { useMetiers } from '../../lib/MetiersContext'
 import { useSelection } from '../../lib/SelectionContext'
 import { tensionRang } from '../../lib/marche'
-import { rechercher } from '../../lib/portrait/moteur'
+import { etoiles, rechercher } from '../../lib/portrait/moteur'
 import { FAMILLES } from '../../lib/taxonomies'
 import { clean } from '../../lib/text'
 import { useStoredState } from '../../lib/useStoredState'
+import { Stars } from '../ikigai'
 import MetierCard from '../MetierCard'
 import { buttonPrimary, buttonSecondary } from '../ui'
 import { Icone } from './theme'
@@ -59,7 +60,8 @@ function Explications({ r }) {
 function Badges({ r }) {
   const indispensable = r.aVerifier.some((t) => t.includes('indispensable'))
   return (
-    <div className="flex flex-wrap gap-1.5 text-xs font-semibold">
+    <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+      <Stars count={etoiles(r)} />
       {r.incompatibilites.length > 0 && <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-rose-800">Ne respecte pas une condition indispensable</span>}
       {indispensable && <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-sky-800">Condition indispensable à vérifier</span>}
       {r.vigilance.length > 0 && <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-rose-700 ring-1 ring-rose-200">Point de vigilance</span>}
