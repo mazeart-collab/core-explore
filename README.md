@@ -9,10 +9,12 @@ Application web d'exploration des métiers (React + Vite + Tailwind CSS), constr
 | `/` | Accueil |
 | `/univers` | Explorer les métiers : univers par familles, recherche tolérante aux fautes |
 | `/metier/:code_rome` | Fiche métier (données officielles ROME et repères enrichis séparés) |
-| `/ce-qui-m-anime` | Je trouve ce qui m'anime : critères, recherche en langage naturel, résultats, « Surprenez-moi » |
+| `/ce-qui-m-anime` | Je trouve ce qui m'anime : portrait professionnel en six dimensions (`?etape=aime`, `savoirs`, `interets`, `sens`, `motivations`, `conditions`), synthèse (`?etape=synthese`), pistes (`?etape=resultats`) et description libre analysée sur l'appareil |
 | `/a-propos` | À propos et sources |
 
-La fonction serveur `api/parse-intent.js` (Vercel) traduit une phrase libre en critères avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`).
+Le référentiel du portrait (identifiants, synonymes, correspondances avec les étiquettes des métiers) est dans `src/lib/portrait/referentiel.js` ; l'analyse du pitch, sans service externe, dans `src/lib/portrait/pitch.js` (un fournisseur IA pourra s'y brancher) ; le moteur de recherche dans `src/lib/portrait/moteur.js` (pondération ajustable `POIDS`, jamais affichée). Tests : `npm test` (dont les tests 1 à 8 du brief, sur la vraie base métiers).
+
+La fonction serveur `api/analyser-pitch.js` (Vercel) traduit la description libre du mode « Je décris mon projet » en critères du portrait, avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`). Sans clé `ANTHROPIC_API_KEY`, ou si le service ne répond pas, la page analyse le texte sur l’appareil (mots-clés, synonymes, négations). Le texte n’est jamais journalisé.
 
 ## Déploiement sur Vercel
 
@@ -87,6 +89,8 @@ Deux workflows manuels sont disponibles dans l'onglet **Actions** du dépôt :
 3. **« 3. Mettre à jour le marché de l'emploi »** : ajoute à chaque métier un bloc `marche_emploi` (niveau de tension, indice France Travail de 1 à 5, offres sur 12 mois, demandeurs d'emploi de catégorie A, source et période) lu dans l'API gratuite « Marché du travail » de France Travail, sans IA. Les blocs `officiel_rome` et `enrichi_ia` ne sont jamais modifiés. Nécessite les secrets `FRANCE_TRAVAIL_CLIENT_ID` et `FRANCE_TRAVAIL_CLIENT_SECRET` (application créée sur francetravail.io avec l'API « Marché du travail »). Le champ « limite » permet un essai rapide sur quelques métiers.
 
    Les mêmes deux variables, ajoutées dans Vercel (Settings › Environment Variables), activent les chiffres par département de l'encart « Réalité du marché près de chez vous » (fonction `api/marche.js`, réponses mises en cache 7 jours). Sans elles, l'encart affiche les chiffres nationaux.
+
+4. **« 4. Noter les liens des métiers (IA) »** : pour chaque métier, Claude note de 1 à 3 son lien avec les centres d'intérêt, les contributions et les motivations (3 = au cœur du métier, 2 = net mais secondaire, 1 = accessoire), à partir des seules données ROME. Le résultat est écrit dans `enrichi_ia.liens` de `public/data/metiers.json` ; le moteur du portrait s'en sert quand il existe (sinon, il pondère les étiquettes par leur rang). Lancer d'abord avec `limit` = 20 pour contrôler, puis « all » (environ 1 900 appels, quelques euros). En local : `npm run data:liens`. Reprise automatique via `data/.liens-progress.jsonl`.
 
 Prérequis pour le workflow 2 : ajouter la clé API dans **Settings > Secrets and variables > Actions > New repository secret**, nom `ANTHROPIC_API_KEY`.
 

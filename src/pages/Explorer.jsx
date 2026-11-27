@@ -1,392 +1,262 @@
-import { useCallback, useMemo, useState } from 'react'
-import CriteriaForm from '../components/CriteriaForm'
-import Guide from '../components/Guide'
-import IntentBox from '../components/IntentBox'
-import MetierCard from '../components/MetierCard'
-import { IkigaiBadges, IkigaiDiagram, Stars } from '../components/ikigai'
-import { DataGate, PageTitle, buttonPrimary, buttonSecondary } from '../components/ui'
-import { Link } from 'react-router'
-import { useMetiers } from '../lib/MetiersContext'
-import { useSelection } from '../lib/SelectionContext'
-import { tensionRang } from '../lib/marche'
-import {
-  EMPTY_CRITERIA,
-  NIVEAUX,
-  PAGE_RESULTATS,
-  PILIERS,
-  countCriteria,
-  normalizeCriteria,
-  rank,
-  surprise,
-} from '../lib/matching'
-import { ACTIVITES, CENTRES_INTERET, COMPETENCES, CRITERES_BY_ID, MOTIVATIONS, SENS, conditionLabel, label } from '../lib/taxonomies'
-import { clean } from '../lib/text'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
+import DimAime from '../components/portrait/DimAime'
+import DimConditions from '../components/portrait/DimConditions'
+import DimInterets from '../components/portrait/DimInterets'
+import DimMotivations from '../components/portrait/DimMotivations'
+import DimSavoirs from '../components/portrait/DimSavoirs'
+import DimSens from '../components/portrait/DimSens'
+import PitchBox from '../components/portrait/PitchBox'
+import Resultats from '../components/portrait/Resultats'
+import Synthese from '../components/portrait/Synthese'
+import { DimensionFrame, Etapes } from '../components/portrait/controls'
+import { Icone, Numero } from '../components/portrait/theme'
+import { THEMES } from '../components/portrait/themes'
+import { ConfirmDialog, DataGate, PageTitle, buttonPrimary, buttonSecondary } from '../components/ui'
+import { DIMENSION_IDS, EMPTY_PORTRAIT, countByDimension, countPortrait, dimensionsRenseignees, normalizePortrait, resetDimension } from '../lib/portrait/model'
+import { DIMENSIONS, DIMENSIONS_BY_ID, SYNTHESE } from '../lib/portrait/referentiel'
 import { useStoredState } from '../lib/useStoredState'
 
-const STORAGE_KEY = 'core-explore:criteres:v1'
+// Réponses conservées pendant la session de navigation uniquement (effacées à la fermeture de l'onglet).
+const STORAGE_KEY = 'core-explore:portrait:v2'
 
-/** Fusionne les critères proposés par l'API dans les critères actuels ; renvoie le nombre d'ajouts. */
-function mergeCriteria(current, incoming) {
-  const next = normalizeCriteria(structuredClone(current))
-  const inc = normalizeCriteria(incoming)
-  let added = 0
-  for (const k of ['activites', 'centres_interet', 'sens_causes', 'motivations']) {
-    for (const id of inc[k]) {
-      if (!next[k].includes(id)) {
-        next[k].push(id)
-        added++
-      }
-    }
-  }
-  for (const [id, etat] of Object.entries(inc.competences)) {
-    if (next.competences[id] !== etat) added++
-    next.competences[id] = etat
-  }
-  for (const [id, pref] of Object.entries(inc.conditions)) {
-    if (!pref?.valeurs?.length) continue
-    if (JSON.stringify(next.conditions[id]) !== JSON.stringify(pref)) added++
-    next.conditions[id] = pref
-  }
-  return { next, added }
+const COMPOSANTS = {
+  aime: DimAime,
+  savoirs: DimSavoirs,
+  interets: DimInterets,
+  sens: DimSens,
+  motivations: DimMotivations,
+  conditions: DimConditions,
 }
 
-function ReasonBlocks({ reasons, gaps, vigilance }) {
-  const points = [...(gaps || []), ...(vigilance || []).map(clean)]
+function CarteDimension({ d, count, onOpen }) {
+  const t = THEMES[d.couleur]
   return (
-    <div className="space-y-3 text-sm">
-      {reasons?.length > 0 && (
-        <div className="rounded-lg bg-teal-50/60 p-3">
-          <p className="mb-1 font-semibold text-teal-900">Pourquoi découvrir ce métier ?</p>
-          <ul className="space-y-1 text-slate-700">
-            {reasons.map((r) => (
-              <li key={r.dimension}>
-                <span className="font-medium">{r.dimension} : </span>
-                {r.items.join(', ')}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {points.length > 0 && (
-        <div className="rounded-lg bg-amber-50/70 p-3">
-          <p className="mb-1 font-semibold text-amber-900">Points à approfondir</p>
-          <ul className="list-disc space-y-1 pl-5 text-slate-700">
-            {points.map((p, i) => (
-              <li key={i}>{p}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-}
-
-
-function ResultCard({ result }) {
-  const aside = (
-    <div className="flex flex-wrap items-center justify-between gap-2">
-      {result.stars >= 2 ? <Stars count={result.stars} /> : <span className="text-xs text-slate-500">Piste inattendue</span>}
-      <IkigaiBadges piliers={result.piliers} />
-    </div>
-  )
-  return (
-    <MetierCard metier={result.metier} aside={aside}>
-      <ReasonBlocks reasons={result.reasons} gaps={result.gaps} vigilance={result.metier.enrichi_ia?.points_vigilance} />
-    </MetierCard>
-  )
-}
-
-function Chevron({ open }) {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className={`ml-auto shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
-      aria-hidden="true"
+    <button
+      type="button"
+      onClick={onOpen}
+      className={`group flex h-full flex-col rounded-2xl border-2 bg-white p-5 text-left transition hover:-translate-y-0.5 hover:shadow-md ${t.carte}`}
     >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
+      <div className="flex items-center gap-3">
+        <Numero dimension={d} />
+        <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${t.doux}`}>
+          <Icone nom={d.icone} size={22} />
+        </span>
+        {count > 0 && (
+          <span className={`ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${t.doux}`}>
+            <Icone nom="coche" size={12} strokeWidth={3} />
+            {count} critère{count > 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+      <h3 className="mt-4 text-lg font-semibold text-slate-900">{d.titre}</h3>
+      <p className="mt-1 flex-1 text-sm text-slate-600">{d.description}</p>
+      <span className={`mt-4 inline-flex items-center gap-1 text-sm font-semibold ${t.texte}`}>
+        {d.id === 'synthese' ? 'Voir mon portrait' : count ? 'Modifier' : 'Compléter'}
+        <Icone nom="fleche" size={16} className="transition-transform group-hover:translate-x-0.5" />
+      </span>
+    </button>
   )
 }
 
-/** Section repliable d'un niveau d'étoiles. */
-function StarGroup({ niveau, results, total, open, onToggle }) {
-  const id = `groupe-${niveau.etoiles}`
+function Progression({ portrait }) {
+  const counts = countByDimension(portrait)
+  const n = dimensionsRenseignees(portrait)
   return (
-    <section className="rounded-xl border border-slate-200 bg-slate-100/50">
-      <h3>
+    <div>
+      <div className="mb-1.5 flex items-center justify-between text-sm">
+        <span className="font-medium text-slate-800">
+          {n ? `${n} dimension${n > 1 ? 's' : ''} sur 6 explorée${n > 1 ? 's' : ''}` : 'Aucune dimension explorée pour l’instant'}
+        </span>
+        <span className="text-xs text-slate-500">Aucune n’est obligatoire</span>
+      </div>
+      <div className="flex gap-1" aria-hidden="true">
+        {DIMENSIONS.map((d) => (
+          <span key={d.id} className={`h-2 flex-1 rounded-full ${counts[d.id] ? THEMES[d.couleur].barre : 'bg-slate-200'}`} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Barre d'action collante : nombre de critères et accès à la recherche dès le premier critère. */
+function BarreAction({ n, onSynthese, onResultats }) {
+  return (
+    <div className="no-print sticky bottom-0 z-20 -mx-4 mt-8 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-t-2xl sm:border-x">
+      <div className="flex items-center gap-3">
+        <p className="flex-1 text-sm text-slate-700">
+          <span className="font-semibold tabular-nums">{n}</span> critère{n > 1 ? 's' : ''}<span className="hidden sm:inline"> dans mon portrait</span>
+        </p>
+        <span className="hidden sm:block">
+          <button type="button" className={buttonSecondary} onClick={onSynthese}>
+            Mon portrait
+          </button>
+        </span>
+        <button type="button" className={buttonPrimary} onClick={onResultats} disabled={!n}>
+          Découvrir mes pistes
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function Accueil({ portrait, setPortrait, go }) {
+  const [mode, setMode] = useState(portrait.pitch ? 'pitch' : null)
+  const counts = countByDimension(portrait)
+  return (
+    <div className="space-y-8">
+      <div className="grid gap-4 md:grid-cols-2">
         <button
           type="button"
-          aria-expanded={open}
-          aria-controls={id}
-          onClick={onToggle}
-          className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-left"
+          aria-expanded={mode === 'pitch'}
+          onClick={() => setMode((m) => (m === 'pitch' ? null : 'pitch'))}
+          className={`flex items-start gap-4 rounded-2xl border-2 p-5 text-left transition ${mode === 'pitch' ? 'border-teal-600 bg-teal-50' : 'border-slate-200 bg-white hover:border-teal-400'}`}
         >
-          <Stars count={niveau.etoiles} />
-          <span className="font-semibold text-slate-900">
-            Métiers {niveau.etoiles} étoiles ({total})
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-700 text-white">
+            <Icone nom="plume" size={22} />
           </span>
-          <span className="text-sm text-slate-500">{niveau.libelle}</span>
-          <Chevron open={open} />
+          <span>
+            <span className="block text-xs font-bold uppercase tracking-wider text-teal-700">Mode 1</span>
+            <span className="block text-lg font-semibold text-slate-900">Je décris mon projet</span>
+            <span className="mt-1 block text-sm text-slate-600">
+              Racontez librement ce que vous recherchez : nous en tirons des critères que vous validez.
+            </span>
+          </span>
         </button>
-      </h3>
-      {open && (
-        <div id={id} className="px-3 pb-3 sm:px-4 sm:pb-4">
-          <div className="grid gap-4 2xl:grid-cols-2">
-            {results.map((r) => (
-              <ResultCard key={r.metier.code_rome} result={r} />
-            ))}
-          </div>
+        <button
+          type="button"
+          onClick={() => document.getElementById('dimensions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          className="flex items-start gap-4 rounded-2xl border-2 border-slate-200 bg-white p-5 text-left transition hover:border-rose-300"
+        >
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500 text-white">
+            <Icone nom="portrait" size={22} />
+          </span>
+          <span>
+            <span className="block text-xs font-bold uppercase tracking-wider text-rose-700">Mode 2</span>
+            <span className="block text-lg font-semibold text-slate-900">Je construis mon portrait professionnel</span>
+            <span className="mt-1 block text-sm text-slate-600">
+              Six dimensions à explorer dans l’ordre de votre choix. Les deux modes se combinent.
+            </span>
+          </span>
+        </button>
+      </div>
+
+      {mode === 'pitch' && (
+        <div className="rounded-2xl border border-teal-200 bg-teal-50/40 p-4 sm:p-6">
+          <PitchBox
+            portrait={portrait}
+            setPortrait={setPortrait}
+            onDone={() => document.getElementById('dimensions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          />
         </div>
       )}
-    </section>
+
+      <section id="dimensions" aria-labelledby="titre-dimensions" className="scroll-mt-20 space-y-4">
+        <h2 id="titre-dimensions" className="text-xl font-semibold text-slate-900">
+          Mon portrait professionnel en six dimensions
+        </h2>
+        <Progression portrait={portrait} />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {DIMENSIONS.map((d) => (
+            <CarteDimension key={d.id} d={d} count={counts[d.id]} onOpen={() => go(d.id)} />
+          ))}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <CarteDimension d={SYNTHESE} count={0} onOpen={() => go('synthese')} />
+        </div>
+      </section>
+    </div>
   )
 }
-
-/** Mots-clés choisis, regroupés par pilier de l'Ikigai (pour l'encart « Votre Ikigai »). */
-function ikigaiTags(c) {
-  const ETAT = { utiliser: '', developper: 'À développer : ', ne_plus: '' }
-  return {
-    aime: [...c.activites.map((id) => label(ACTIVITES, id)), ...c.centres_interet.map((id) => label(CENTRES_INTERET, id))].map(
-      (l) => ({ label: l }),
-    ),
-    talents: Object.entries(c.competences).map(([id, etat]) => ({
-      label: ETAT[etat] + label(COMPETENCES, id),
-      negative: etat === 'ne_plus',
-    })),
-    sens: c.sens_causes.map((id) => ({ label: label(SENS, id) })),
-    equilibre: [
-      ...c.motivations.map((id) => ({ label: label(MOTIVATIONS, id) })),
-      ...Object.entries(c.conditions)
-        .filter(([id, p]) => p?.valeurs?.length && CRITERES_BY_ID[id])
-        .map(([id, p]) => ({
-          label: `${CRITERES_BY_ID[id].libelle} : ${conditionLabel(id, p.valeurs.length === 1 ? p.valeurs[0] : p.valeurs)}${p.importance === 'indispensable' ? ' (indispensable)' : ''}`,
-          negative: p.importance === 'eviter',
-        })),
-    ],
-  }
-}
-
-const plural = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`
 
 function ExplorerContent() {
-  const { metiers } = useMetiers()
-  const [criteria, setCriteria] = useStoredState(STORAGE_KEY, EMPTY_CRITERIA, normalizeCriteria)
-  const [surprises, setSurprises] = useState(null)
-  const [openPanel, setOpenPanel] = useState('activites')
-  // Groupes d'étoiles repliés par l'utilisateur.
-  const [closedGroups, setClosedGroups] = useState(() => new Set())
+  const [portrait, setPortrait] = useStoredState(STORAGE_KEY, EMPTY_PORTRAIT, normalizePortrait, { session: true })
+  const [params, setParams] = useSearchParams()
+  const [confirmReset, setConfirmReset] = useState(false)
+  const etape = params.get('etape')
+  const vue = DIMENSIONS_BY_ID[etape] || etape === 'resultats' ? etape : null // (dimension, synthèse ou résultats)
 
-  const nbCriteria = countCriteria(criteria)
-  const { ecartes } = useSelection()
-  // Les métiers écartés (« Pas pour moi ») sortent des résultats actifs ; ils restent dans le panier.
-  const actifs = useMemo(() => metiers.filter((m) => !ecartes[m.code_rome]), [metiers, ecartes])
-  const nbEcartes = metiers.length - actifs.length
-  // La rareté des critères est calculée sur tous les métiers, écartés compris, pour rester stable.
-  const { results, hiddenCount } = useMemo(() => rank(actifs, criteria, metiers), [actifs, criteria, metiers])
-  // « Privilégier les métiers qui recrutent » : à étoiles égales, les métiers en tension passent devant.
-  const [recrutent, setRecrutent] = useStoredState('core-explore:privilegier-recrutement', false, Boolean)
-  const hasMarche = useMemo(() => metiers.some((m) => m.marche_emploi && m.marche_emploi.niveau_tension !== 'inconnue'), [metiers])
-  const ordered = useMemo(
-    () =>
-      recrutent && hasMarche
-        ? [...results].sort(
-            (a, b) => b.stars - a.stars || tensionRang(a.metier) - tensionRang(b.metier) || b.rate - a.rate,
-          )
-        : results,
-    [results, recrutent, hasMarche],
-  )
-  // Résultats affichés par pages de PAGE_RESULTATS ; on revient à la première page quand la liste change.
-  const [pages, setPages] = useState({ liste: null, n: 1 })
-  const nbPages = pages.liste === results ? pages.n : 1
-  const shown = ordered.slice(0, nbPages * PAGE_RESULTATS)
-  const rest = ordered.length - shown.length
-  const groups = useMemo(
-    () =>
-      NIVEAUX.map((niveau) => ({
-        niveau,
-        results: shown.filter((r) => r.stars === niveau.etoiles),
-        total: ordered.filter((r) => r.stars === niveau.etoiles).length,
-      })).filter((g) => g.results.length),
-    [shown, ordered],
-  )
+  const go = (id) => setParams(id ? { etape: id } : {})
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [vue])
 
-  const pilierTags = useMemo(() => ikigaiTags(criteria), [criteria])
+  const counts = countByDimension(portrait)
+  const n = countPortrait(portrait)
+  const index = DIMENSION_IDS.indexOf(vue)
 
-  // Clic sur un cercle de l'Ikigai : ouvre la section correspondante et la fait défiler à l'écran.
-  const selectPilier = (id) => {
-    const pilier = PILIERS.find((p) => p.id === id)
-    const panelId = pilier.panels.includes(openPanel) ? openPanel : pilier.panels[0]
-    setOpenPanel(panelId)
-    setTimeout(() => {
-      document.getElementById(`criteres-${panelId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
-  }
-
-  const toggleGroup = (etoiles) =>
-    setClosedGroups((s) => {
-      const next = new Set(s)
-      if (next.has(etoiles)) next.delete(etoiles)
-      else next.add(etoiles)
-      return next
-    })
-
-  const applyIntent = useCallback(
-    (incoming) => {
-      const { next, added } = mergeCriteria(criteria, incoming)
-      setCriteria(next)
-      return added
-    },
-    [criteria, setCriteria],
-  )
-
-  const reset = () => {
-    setCriteria(EMPTY_CRITERIA)
-    setSurprises(null)
-  }
+  let contenu
+  if (index >= 0) {
+    const d = DIMENSIONS[index]
+    const Composant = COMPOSANTS[d.id]
+    const suivant = index < DIMENSIONS.length - 1 ? DIMENSIONS[index + 1] : SYNTHESE
+    contenu = (
+      <DimensionFrame
+        dimension={d}
+        count={counts[d.id]}
+        onReset={() => setPortrait((p) => resetDimension(p, d.id))}
+        onPrev={() => go(index ? DIMENSIONS[index - 1].id : null)}
+        onNext={() => go(suivant.id)}
+        nextLabel={suivant.id === 'synthese' ? 'Voir mon portrait' : `Dimension suivante : ${suivant.titre}`}
+      >
+        <Composant portrait={portrait} setPortrait={setPortrait} />
+      </DimensionFrame>
+    )
+  } else if (vue === 'synthese') {
+    contenu = (
+      <Synthese
+        portrait={portrait}
+        setPortrait={setPortrait}
+        onEdit={(id) => go(id)}
+        onReset={() => setConfirmReset(true)}
+        onResultats={() => go('resultats')}
+      />
+    )
+  } else if (vue === 'resultats') {
+    contenu = n ? (
+      <Resultats portrait={portrait} onSynthese={() => go('synthese')} />
+    ) : (
+      <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+        Renseignez au moins un critère pour découvrir des pistes.{' '}
+        <button type="button" className="font-semibold text-teal-700 hover:underline" onClick={() => go(null)}>
+          Commencer mon portrait
+        </button>
+      </p>
+    )
+  } else contenu = <Accueil portrait={portrait} setPortrait={setPortrait} go={go} />
 
   return (
     <div className="space-y-6">
-      <Guide />
-      <IntentBox onCriteria={applyIntent} />
-      <IkigaiDiagram tags={pilierTags} onSelect={selectPilier} />
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-slate-900">Mes critères</h2>
-            <button
-              type="button"
-              onClick={reset}
-              disabled={!nbCriteria}
-              className="text-sm font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline disabled:opacity-40 disabled:no-underline"
-            >
-              Réinitialiser
-            </button>
-          </div>
-          <p className="mb-3 text-xs text-slate-500">
-            Aucun champ n’est obligatoire. Vos choix sont enregistrés automatiquement sur cet appareil.
-          </p>
-          <CriteriaForm criteria={criteria} setCriteria={setCriteria} openPanel={openPanel} setOpenPanel={setOpenPanel} />
-        </div>
-
-        <div className="space-y-4" aria-live="polite">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">
-              {nbCriteria
-                ? results.length
-                  ? `${plural(results.length, 'métier')} à découvrir`
-                  : 'Aucun métier ne correspond encore'
-                : 'Des métiers à découvrir'}
-            </h2>
-            <button
-              type="button"
-              className={buttonPrimary}
-              onClick={() => setSurprises(surprise(actifs, criteria, results))}
-            >
-              Surprenez-moi
-            </button>
-          </div>
-
-          <label
-            className={`flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm ${hasMarche ? 'text-slate-700' : 'text-slate-400'}`}
+      {vue && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={() => go(null)}
+            className="no-print inline-flex items-center gap-1 self-start text-sm font-medium text-slate-600 hover:text-slate-900"
           >
-            <input
-              type="checkbox"
-              checked={recrutent && hasMarche}
-              disabled={!hasMarche}
-              onChange={(e) => setRecrutent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 accent-teal-700"
-            />
-            <span>
-              Privilégier les métiers qui recrutent
-              <span className="block text-xs text-slate-500">
-                {hasMarche
-                  ? 'À étoiles égales, les métiers en tension (source France Travail) passent en premier.'
-                  : 'Disponible dès que les indicateurs du marché de l’emploi auront été importés.'}
-              </span>
-            </span>
-          </label>
-
-          {surprises && (
-            <section className="rounded-xl border border-dashed border-teal-300 bg-white p-4">
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold text-slate-900">Des pistes moins évidentes</h3>
-                  <p className="text-sm text-slate-500">Des métiers variés, issus d’univers différents.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSurprises(null)}
-                  className="text-sm text-slate-500 hover:text-slate-800"
-                >
-                  Fermer
-                </button>
-              </div>
-              {surprises.length ? (
-                <div className="grid gap-4 2xl:grid-cols-2">
-                  {surprises.map((r) => (
-                    <ResultCard key={r.metier.code_rome} result={r} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-600">Pas d’autre piste pour l’instant : élargissez vos critères.</p>
-              )}
-            </section>
-          )}
-
-          {nbCriteria > 0 && !results.length && (
-            <p className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
-              Essayez d’assouplir certains critères (par exemple passer un critère « Indispensable » en
-              « Souhaitable ») ou laissez-vous surprendre.
-            </p>
-          )}
-
-          {groups.map((g) => (
-            <StarGroup
-              key={g.niveau.etoiles}
-              niveau={g.niveau}
-              results={g.results}
-              total={g.total}
-              open={!closedGroups.has(g.niveau.etoiles)}
-              onToggle={() => toggleGroup(g.niveau.etoiles)}
-            />
-          ))}
-
-          {rest > 0 && (
-            <div className="text-center">
-              <button
-                type="button"
-                className={buttonSecondary}
-                onClick={() => setPages({ liste: results, n: nbPages + 1 })}
-              >
-                Voir plus de métiers ({Math.min(rest, PAGE_RESULTATS)} sur {rest} restant{rest > 1 ? 's' : ''})
-              </button>
-            </div>
-          )}
-
-          {nbEcartes > 0 && (
-            <p className="text-xs text-slate-500">
-              {plural(nbEcartes, 'métier')} écarté{nbEcartes > 1 ? 's' : ''} (« Pas pour moi ») masqué
-              {nbEcartes > 1 ? 's' : ''}.{' '}
-              <Link to="/panier" className="font-medium text-teal-700 hover:underline">
-                Les retrouver dans mon panier
-              </Link>
-            </p>
-          )}
-
-          {nbCriteria > 0 && hiddenCount > 0 && (
-            <p className="text-xs text-slate-500">
-              {hiddenCount > 0 &&
-                `${plural(hiddenCount, 'autre métier')} partage${hiddenCount > 1 ? 'nt' : ''} un point commun avec vos choix, sans être assez proche${hiddenCount > 1 ? 's' : ''} pour être affiché${hiddenCount > 1 ? 's' : ''}.`}
-            </p>
-          )}
+            <Icone nom="retour" size={16} />
+            Accueil du portrait
+          </button>
+          <div className="min-w-0 flex-1">
+            <Etapes courante={vue} counts={counts} onGo={go} />
+          </div>
         </div>
-      </div>
+      )}
+      {contenu}
+      {vue !== 'resultats' && vue !== 'synthese' && <BarreAction n={n} onSynthese={() => go('synthese')} onResultats={() => go('resultats')} />}
+      <ConfirmDialog
+        open={confirmReset}
+        title="Réinitialiser tous mes critères ?"
+        confirmLabel="Tout réinitialiser"
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={() => {
+          setPortrait(EMPTY_PORTRAIT)
+          setConfirmReset(false)
+          go(null)
+        }}
+      >
+        Les six dimensions et votre description seront vidées. Cette action ne peut pas être annulée.
+      </ConfirmDialog>
     </div>
   )
 }
@@ -395,9 +265,13 @@ export default function Explorer() {
   return (
     <>
       <PageTitle title="Je trouve ce qui m’anime">
-        Partez de vos envies, de vos compétences et de ce qui compte pour vous. Les métiers proposés ne sont pas un
-        verdict : ce sont des pistes à explorer, avec ce qui les relie à vos choix et les points à approfondir.
+        Construisez votre portrait professionnel à votre rythme. Les métiers proposés ne sont pas un verdict : ce sont des
+        pistes à explorer, avec ce qui les relie à vous et les points à approfondir.
       </PageTitle>
+      <p className="no-print -mt-5 mb-6 text-xs text-slate-500">
+        Sans compte : vos réponses restent sur cet appareil, le temps de votre navigation, et sont effacées à la fermeture de
+        l’onglet.
+      </p>
       <DataGate>
         <ExplorerContent />
       </DataGate>
