@@ -133,3 +133,16 @@ describe('étoiles', () => {
     expect(etoiles({ score: 0.95, incompatibilites: [], vigilance: [] })).toBe(5)
   })
 })
+
+describe('centres d’intérêt : lien pondéré par le rang de l’étiquette', () => {
+  it('« Psychologie et relations humaines » ne remonte pas une station de lavage', () => {
+    const r = rechercher(metiers, portrait({ interets: ['psychologie_et_relations_humaines'] }))
+    const lavage = r.tous.find((x) => /station de lavage/i.test(x.metier.intitule))
+    expect(lavage).toBeTruthy()
+    expect(r.pertinentes.includes(lavage)).toBe(false)
+    expect(lavage.score).toBeLessThan(0.55)
+    const psy = r.tous.filter((x) => /psycholog/i.test(x.metier.intitule))
+    expect(psy.length).toBeGreaterThan(0)
+    expect(Math.min(...psy.map((x) => x.score))).toBeGreaterThanOrEqual(0.75)
+  })
+})

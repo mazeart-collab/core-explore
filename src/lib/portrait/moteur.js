@@ -81,6 +81,7 @@ function indexer(m) {
       activites: new Set(e.activites || []),
       competences: new Set(e.competences_categories || []),
       interets: new Set(e.centres_interet || []),
+      interetsListe: e.centres_interet || [],
       sens: new Set(e.sens_causes || []),
       motivations: new Set(e.motivations || []),
     },
@@ -94,6 +95,15 @@ function indexer(m) {
 }
 
 const hasAny = (set, list) => list.some((x) => set.has(x))
+/**
+ * Force du lien entre une étiquette et un métier selon son rang dans la fiche : les étiquettes sont
+ * classées de la plus à la moins caractéristique (la 1re compte plus que la 4e).
+ */
+const RANG = [1, 0.75, 0.5, 0.35]
+const forceRang = (liste, taxo) => {
+  const i = liste.findIndex((x) => taxo.includes(x))
+  return i < 0 ? 0 : (RANG[i] ?? RANG[RANG.length - 1])
+}
 const topK = (vals, k) =>
   vals
     .sort((a, b) => b - a)
@@ -280,7 +290,7 @@ export function evaluer(metier, prep) {
       if (isPerso(id)) {
         const w = words(persoLabel(id)).filter((x) => x.length >= 4)
         c = w.length && w.every((x) => ix.texte.includes(stem(x))) ? 0.7 : 0
-      } else c = hasAny(ix.tags.interets, INTERETS_BY_ID[id]?.taxo || []) ? 1 : 0
+      } else c = forceRang(ix.tags.interetsListe, INTERETS_BY_ID[id]?.taxo || [])
       credits.push(c)
       if (c) items.push(isPerso(id) ? persoLabel(id) : INTERETS_BY_ID[id].libelle)
     }
