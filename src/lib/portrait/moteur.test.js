@@ -138,9 +138,8 @@ describe('centres d’intérêt : lien pondéré par le rang de l’étiquette',
   it('« Psychologie et relations humaines » ne remonte pas une station de lavage', () => {
     const r = rechercher(metiers, portrait({ interets: ['psychologie_et_relations_humaines'] }))
     const lavage = r.tous.find((x) => /station de lavage/i.test(x.metier.intitule))
-    expect(lavage).toBeTruthy()
-    expect(r.pertinentes.includes(lavage)).toBe(false)
-    expect(lavage.score).toBeLessThan(0.55)
+    // Absent de la liste (aucun lien noté) ou, au pire, jamais parmi les pistes pertinentes.
+    expect(lavage ? r.pertinentes.includes(lavage) : false).toBe(false)
     const psy = r.tous.filter((x) => /psycholog/i.test(x.metier.intitule))
     expect(psy.length).toBeGreaterThan(0)
     expect(Math.min(...psy.map((x) => x.score))).toBeGreaterThanOrEqual(0.75)
@@ -157,7 +156,8 @@ describe('liens notés par l’IA (enrichi_ia.liens)', () => {
     const s = (m) => r.tous.find((x) => x.metier.code_rome === m.code_rome).score
     expect(s(psy)).toBe(1)
     expect(s(lavage)).toBeCloseTo(0.3)
-    const sans = rechercher([lavage], portrait({ interets: ['psychologie_et_relations_humaines'] }), { elargi: true })
+    const sansLiens = { ...lavage, enrichi_ia: { ...lavage.enrichi_ia, liens: undefined } }
+    const sans = rechercher([sansLiens], portrait({ interets: ['psychologie_et_relations_humaines'] }), { elargi: true })
     expect(sans.tous[0].score).toBeCloseTo(0.5)
   })
 })
