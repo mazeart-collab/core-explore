@@ -12,7 +12,7 @@ Application web d'exploration des métiers (React + Vite + Tailwind CSS), constr
 | `/ce-qui-m-anime` | Je trouve ce qui m'anime : portrait professionnel en six dimensions (`?etape=aime`, `savoirs`, `interets`, `sens`, `motivations`, `conditions`), synthèse (`?etape=synthese`), pistes (`?etape=resultats`) et description libre analysée sur l'appareil |
 | `/a-propos` | À propos et sources |
 
-Le référentiel du portrait (identifiants, synonymes, correspondances avec les étiquettes des métiers) est dans `src/lib/portrait/referentiel.js` ; l'analyse du pitch, sans service externe, dans `src/lib/portrait/pitch.js` (un fournisseur IA pourra s'y brancher). Tests : `npm test`.
+Le référentiel du portrait (identifiants, synonymes, correspondances avec les étiquettes des métiers) est dans `src/lib/portrait/referentiel.js` ; l'analyse du pitch, sans service externe, dans `src/lib/portrait/pitch.js` (un fournisseur IA pourra s'y brancher) ; le moteur de recherche dans `src/lib/portrait/moteur.js` (pondération ajustable `POIDS`, jamais affichée). Tests : `npm test` (dont les tests 1 à 8 du brief, sur la vraie base métiers).
 
 La fonction serveur `api/parse-intent.js` (plus utilisée par la page depuis la refonte du portrait) (Vercel) traduit une phrase libre en critères avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`).
 

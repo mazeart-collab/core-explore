@@ -15,8 +15,11 @@ const ATTENUATIONS = new Set(['moins', 'peu', 'limiter', 'limite', 'reduire', 't
 // Mots trop ambigus pour être reconnus seuls dans un texte libre.
 const AMBIGUS = new Set(['mode', 'art', 'ia', 'cr', 'jeu', 'plan', 'plans', 'lien', 'outil', 'outils', 'besoins', 'resultats', 'objectifs', 'evaluer', 'site', 'code', 'demo', 'trace', 'tracer', 'monter', 'lettre', 'tableau', 'reseau', 'contenu', 'objet', 'produit', 'espace', 'interieur', 'protection', 'controles', 'securite', 'qualite', 'culture', 'loi', 'normes', 'mesures', 'vin'])
 
-/** Découpe un texte normalisé en mots. */
-const tokens = (t) => t.split(/[^a-z0-9]+/).filter(Boolean)
+// Marqueur de fin de phrase : une négation ne porte pas au-delà.
+const FIN = 'zzfin'
+
+/** Découpe un texte normalisé en mots (les fins de phrase deviennent un marqueur). */
+const tokens = (t) => t.replace(/[.!?;:]+/g, ` ${FIN} `).split(/[^a-z0-9]+/).filter(Boolean)
 
 /**
  * Positions (index de mot) où une forme apparaît.
@@ -45,7 +48,7 @@ function contexte(toks, i, fenetre = 8) {
   let negation = false
   let attenuation = false
   for (let k = Math.max(0, i - fenetre); k < i; k++) {
-    if (['mais', 'et', 'ou', 'puis', 'car', 'donc'].includes(toks[k])) {
+    if ([FIN, 'mais', 'et', 'ou', 'puis', 'car', 'donc'].includes(toks[k])) {
       negation = false
       attenuation = false
     }

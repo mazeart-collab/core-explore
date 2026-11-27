@@ -226,6 +226,54 @@ export const VERBES = Object.fromEntries(
   AIME_FAMILLES.flatMap((f) => f.verbes.map((x) => [x.id, { ...x, famille: f.id }])),
 )
 
+/**
+ * Couche de correspondance verbe → verbes d'action des savoir-faire officiels du ROME
+ * (premier mot de la ligne, ou début de ligne pour une expression). Un même verbe ouvre ainsi
+ * vers des métiers très différents : « Concevoir » couvre « Élaborer un plan », « Modéliser »…
+ */
+export const VERBES_ROME = {
+  imaginer: ['imaginer', 'inventer', 'proposer', 'creer'],
+  creer: ['creer', 'composer', 'dessiner', 'illustrer', 'inventer', 'imaginer'],
+  concevoir: ['concevoir', 'elaborer', 'modeliser', 'dessiner', 'prototyper', 'imaginer'],
+  inventer: ['inventer', 'innover', 'imaginer', 'mettre au point'],
+  s_exprimer: ['interpreter', 'jouer', 'chanter', 'ecrire', 'rediger', 'raconter', 'improviser'],
+  fabriquer: ['fabriquer', 'produire', 'usiner', 'faconner', 'confectionner', 'assembler', 'monter', 'souder'],
+  construire: ['construire', 'batir', 'maconner', 'poser', 'installer', 'edifier', 'monter', 'coffrer'],
+  transformer: ['transformer', 'faconner', 'cuisiner', 'decouper', 'usiner', 'travailler'],
+  reparer: ['reparer', 'depanner', 'restaurer', 'remplacer', 'entretenir', 'remettre en etat'],
+  manipuler: ['manipuler', 'conduire', 'piloter', 'manoeuvrer', 'regler', 'utiliser'],
+  experimenter: ['experimenter', 'tester', 'essayer', 'mesurer'],
+  organiser: ['organiser', 'structurer', 'preparer', 'ordonnancer'],
+  planifier: ['planifier', 'ordonnancer', 'anticiper', 'programmer les'],
+  coordonner: ['coordonner', 'superviser', 'piloter'],
+  gerer: ['gerer', 'administrer', 'tenir'],
+  optimiser: ['optimiser', 'ameliorer', 'rationaliser'],
+  observer: ['observer', 'surveiller', 'reperer', 'inspecter'],
+  comprendre: ['interpreter', 'etudier', 'identifier', 'comprendre'],
+  rechercher: ['rechercher', 'collecter', 'enqueter', 'etudier', 'investiguer', 'recenser'],
+  analyser: ['analyser', 'evaluer', 'etudier', 'calculer', 'interpreter'],
+  resoudre: ['resoudre', 'diagnostiquer', 'depanner', 'traiter'],
+  controler: ['controler', 'verifier', 'inspecter', 'auditer'],
+  ecouter: ['ecouter', 'recueillir', 'accueillir'],
+  aider: ['aider', 'assister', 'soutenir', 'accompagner'],
+  accompagner: ['accompagner', 'orienter', 'guider', 'soutenir', 'suivre'],
+  conseiller: ['conseiller', 'preconiser', 'orienter', 'renseigner'],
+  soigner: ['soigner', 'prodiguer', 'panser', 'masser', 'realiser des soins'],
+  proteger: ['proteger', 'securiser', 'defendre', 'prevenir', 'sauvegarder'],
+  communiquer: ['communiquer', 'informer', 'diffuser', 'presenter', 'promouvoir'],
+  transmettre: ['transmettre', 'former', 'enseigner', 'expliquer'],
+  animer: ['animer', 'divertir'],
+  convaincre: ['convaincre', 'argumenter', 'promouvoir', 'persuader'],
+  negocier: ['negocier'],
+  vendre: ['vendre', 'commercialiser', 'prospecter'],
+  mettre_en_relation: ['mettre en relation', 'developper un reseau', 'relier', 'mettre en contact'],
+  entreprendre: ['creer une entreprise', 'creer une activite', 'reprendre une entreprise', 'lancer'],
+  diriger: ['diriger', 'manager', 'encadrer', 'piloter'],
+  decider: ['decider', 'arbitrer', 'determiner', 'valider', 'definir la strategie'],
+  developper: ['developper', 'deployer', 'lancer'],
+  federer: ['federer', 'mobiliser', 'rassembler', 'impliquer'],
+}
+
 // ---------------------------------------------------------------------------
 // Dimension 2 — Ce que je sais faire (bibliothèque de savoir-faire)
 // ---------------------------------------------------------------------------
