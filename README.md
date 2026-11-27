@@ -9,10 +9,12 @@ Application web d'exploration des métiers (React + Vite + Tailwind CSS), constr
 | `/` | Accueil |
 | `/univers` | Explorer les métiers : univers par familles, recherche tolérante aux fautes |
 | `/metier/:code_rome` | Fiche métier (données officielles ROME et repères enrichis séparés) |
-| `/ce-qui-m-anime` | Je trouve ce qui m'anime : critères, recherche en langage naturel, résultats, « Surprenez-moi » |
+| `/ce-qui-m-anime` | Je trouve ce qui m'anime : portrait professionnel en six dimensions (`?etape=aime`, `savoirs`, `interets`, `sens`, `motivations`, `conditions`), synthèse (`?etape=synthese`), pistes (`?etape=resultats`) et description libre analysée sur l'appareil |
 | `/a-propos` | À propos et sources |
 
-La fonction serveur `api/parse-intent.js` (Vercel) traduit une phrase libre en critères avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`).
+Le référentiel du portrait (identifiants, synonymes, correspondances avec les étiquettes des métiers) est dans `src/lib/portrait/referentiel.js` ; l'analyse du pitch, sans service externe, dans `src/lib/portrait/pitch.js` (un fournisseur IA pourra s'y brancher). Tests : `npm test`.
+
+La fonction serveur `api/parse-intent.js` (plus utilisée par la page depuis la refonte du portrait) (Vercel) traduit une phrase libre en critères avec Claude Haiku (`claude-haiku-5-5`, modifiable par la variable `ANTHROPIC_MODEL`).
 
 ## Déploiement sur Vercel
 

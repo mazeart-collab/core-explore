@@ -9,12 +9,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "oxlint",
     "preview": "vite preview",
     "data:import": "node scripts/import-rome.js",
     "data:import:sample": "node scripts/import-rome.js --from=scripts/fixtures/rome-sample --out=data/rome_base.sample.json",
     "data:enrich": "node scripts/enrich-metiers.js",
-    "data:marche": "node scripts/enrichir-marche.mjs"
+    "data:marche": "node scripts/enrichir-marche.mjs",
+    "lint": "oxlint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.13.0",
@@ -33,6 +34,7 @@
     "csv-parse": "^7.0.3",
     "oxlint": "^1.90.0",
     "tailwindcss": "^4.3.5",
-    "vite": "^8.3.6"
+    "vite": "^8.3.6",
+    "vitest": "^3.2.7"
   }
 }

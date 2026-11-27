@@ -65,21 +65,44 @@
   --color-amber-50: #fff8e1;
   --color-amber-100: #fff0bd;
   --color-amber-200: #ffe684;
+  --color-amber-300: #ffd95a;
+  --color-amber-400: #f5c842;
+  --color-amber-500: #e0ac2b;
+  --color-amber-600: #b98a1c;
   --color-amber-700: #8a6514;
   --color-amber-800: #6f5110;
   --color-amber-900: #573f0c;
 
   /* Sauge (marché qui recrute, équilibre) */
   --color-emerald-50: #f0f2ea;
+  --color-emerald-100: #e1e6d6;
   --color-emerald-200: #c9d1b6;
+  --color-emerald-300: #aab68f;
+  --color-emerald-500: #7a8a5c;
+  --color-emerald-600: #66754b;
   --color-emerald-700: #55633f;
   --color-emerald-800: #444f32;
 
   /* Ocre doux (marché équilibré, talents) */
   --color-sky-50: #fbf1e4;
+  --color-sky-100: #f6e2c8;
   --color-sky-200: #ecc9a0;
+  --color-sky-300: #dfae78;
+  --color-sky-500: #b97a3d;
+  --color-sky-600: #a0672f;
   --color-sky-700: #8d5a26;
   --color-sky-800: #71481e;
+
+  /* Bleu CORE (motivations, savoir-faire à développer) */
+  --color-blue-50: #eef3f7;
+  --color-blue-100: #dae5ee;
+  --color-blue-200: #b6cbdc;
+  --color-blue-300: #8eaec6;
+  --color-blue-400: #6890ae;
+  --color-blue-500: #4a7596;
+  --color-blue-600: #3b5f7c;
+  --color-blue-700: #2f4d65;
+  --color-blue-800: #253d50;
 }
 
 @layer base {
@@ -92,5 +115,52 @@
   h2,
   h3 {
     font-family: var(--font-heading);
+  }
+}
+
+/* Curseurs à 5 positions de la dimension « Conditions de travail » */
+input[type='range'].curseur {
+  appearance: none;
+  height: 2rem;
+  background: transparent;
+  cursor: pointer;
+}
+input[type='range'].curseur::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-slate-200);
+}
+input[type='range'].curseur::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-slate-200);
+}
+input[type='range'].curseur::-webkit-slider-thumb {
+  appearance: none;
+  margin-top: -9px;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: var(--thumb, var(--color-slate-300));
+  border: 3px solid white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+input[type='range'].curseur::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: var(--thumb, var(--color-slate-300));
+  border: 3px solid white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+input[type='range'].curseur:focus-visible {
+  outline: 2px solid var(--color-teal-700);
+  outline-offset: 2px;
+  border-radius: 9999px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
   }
 }
