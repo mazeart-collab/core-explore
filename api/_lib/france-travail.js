@@ -35,12 +35,12 @@ export function identifiants(env = process.env) {
 let cache = null
 
 /** Jeton OAuth2 « client credentials », réutilisé jusqu'à une minute avant son expiration. */
-export async function jeton({ id, secret }, scope = SCOPE) {
-  if (cache && cache.id === id && cache.scope === scope && cache.expire > Date.now()) return cache.valeur
+export async function jeton({ id, secret }) {
+  if (cache && cache.id === id && cache.expire > Date.now()) return cache.valeur
   const r = await fetch(TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: id, client_secret: secret, scope }),
+    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: id, client_secret: secret, scope: SCOPE }),
   })
   if (!r.ok) {
     const detail = (await r.text().catch(() => '')).slice(0, 300)
@@ -52,7 +52,7 @@ export async function jeton({ id, secret }, scope = SCOPE) {
   }
   const d = await r.json()
   if (!d.access_token) throw new Error('Authentification France Travail : pas de jeton dans la réponse.')
-  cache = { id, scope, valeur: d.access_token, expire: Date.now() + Math.max(60, (d.expires_in || 1499) - 60) * 1000 }
+  cache = { id, valeur: d.access_token, expire: Date.now() + Math.max(60, (d.expires_in || 1499) - 60) * 1000 }
   return cache.valeur
 }
 

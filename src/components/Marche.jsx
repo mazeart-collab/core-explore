@@ -20,31 +20,6 @@ export function TensionBadge({ metier, niveau }) {
 
 const fmt = (n) => Number(n).toLocaleString('fr-FR')
 
-/** « 1 900 – 2 400 € », ou le montant seul quand la tranche est resserrée. */
-function trancheSalaire(s) {
-  if (!s?.min || !s?.max) return null
-  return s.min === s.max ? `${fmt(s.min)} €` : `${fmt(s.min)} – ${fmt(s.max)} €`
-}
-
-/** Tranche de salaire des offres France Travail (chiffres nationaux). */
-function Salaire({ salaire }) {
-  const t = trancheSalaire(salaire)
-  if (!t) return null
-  return (
-    <div className="rounded-lg bg-amber-50 p-4 ring-1 ring-amber-200">
-      <p className="text-xs text-slate-600">Salaire proposé dans les offres (France entière)</p>
-      <p className="mt-1 text-xl font-semibold text-slate-900">
-        {t} <span className="text-sm font-normal text-slate-600">brut par mois</span>
-      </p>
-      <p className="mt-1 text-xs text-slate-600">
-        La moitié des {fmt(salaire.nb_offres)} offres récentes qui affichent un salaire se situe dans cette tranche
-        (temps plein, salaire médian {fmt(salaire.mediane)} €). Le salaire varie selon l’expérience, la région et
-        l’employeur.
-      </p>
-    </div>
-  )
-}
-
 function Bouton({ href, children, primary }) {
   return (
     <a
@@ -129,10 +104,6 @@ export function MarcheLocal({ metier }) {
         </label>
       </div>
 
-      <div className="mt-4">
-        <Salaire salaire={national?.salaire} />
-      </div>
-
       {local.statut === 'chargement' && (
         <p className="mt-4 text-sm text-slate-500" role="status">
           Chargement des chiffres pour {nomDept}…
@@ -183,6 +154,24 @@ export function MarcheLocal({ metier }) {
             ci-dessous donnent accès aux offres et statistiques à jour.
           </p>
         )
+      )}
+
+      {metier.officiel_rome.lien_metierscope && (
+        <div className="mt-5 rounded-lg bg-amber-50 p-4 ring-1 ring-amber-200">
+          <p className="text-sm font-semibold text-slate-900">Et le salaire ?</p>
+          <p className="mt-1 text-sm text-slate-700">
+            Les salaires de ce métier sont à retrouver sur sa fiche officielle France Travail (MétierScope), rubrique
+            « Statistiques ».{' '}
+            <a
+              href={metier.officiel_rome.lien_metierscope}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-teal-700 underline hover:text-teal-800"
+            >
+              Voir les salaires sur la fiche officielle<span className="sr-only"> (nouvel onglet)</span>
+            </a>
+          </p>
+        </div>
       )}
 
       <div className="mt-5 grid gap-2 sm:grid-cols-3">

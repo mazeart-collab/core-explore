@@ -11,7 +11,7 @@
  *   - indice de tension « difficultés de recrutement » (1 à 5) → niveau_tension ;
  *   - offres d'emploi enregistrées sur 12 mois ;
  *   - demandeurs d'emploi de catégorie A.
- * Seul le bloc « marche_emploi » est écrit (sa tranche de salaire est conservée) : officiel_rome et enrichi_ia ne sont jamais modifiés.
+ * Seul le bloc « marche_emploi » est écrit : officiel_rome et enrichi_ia ne sont jamais modifiés.
  * Avec --limite ou --codes, les autres métiers gardent leurs chiffres précédents.
  */
 import fs from 'node:fs'
@@ -65,10 +65,7 @@ async function main() {
     await Promise.all(
       lot.map(async (m) => {
         try {
-          // La tranche de salaire vient d'un autre script (enrichir-salaires.mjs) : on la garde.
-          const salaire = m.marche_emploi?.salaire
           m.marche_emploi = await marcheMetier(creds, m.code_rome)
-          if (salaire) m.marche_emploi.salaire = salaire
           stats[m.marche_emploi.niveau_tension]++
         } catch (e) {
           erreurs++
