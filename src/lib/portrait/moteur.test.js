@@ -146,3 +146,18 @@ describe('centres d’intérêt : lien pondéré par le rang de l’étiquette',
     expect(Math.min(...psy.map((x) => x.score))).toBeGreaterThanOrEqual(0.75)
   })
 })
+
+describe('liens notés par l’IA (enrichi_ia.liens)', () => {
+  it('une note 1 pèse moins qu’une note 3 ; les métiers non notés gardent le repli par rang', () => {
+    const psy = metiers.find((m) => /psycholog/i.test(m.intitule))
+    const lavage = metiers.find((m) => /station de lavage/i.test(m.intitule))
+    const notes = (n) => ({ interets: { psychologie_et_relations_humaines: n }, sens: {}, motivations: {} })
+    const avec = (m, n) => ({ ...m, enrichi_ia: { ...m.enrichi_ia, liens: notes(n) } })
+    const r = rechercher([avec(psy, 3), avec(lavage, 1)], portrait({ interets: ['psychologie_et_relations_humaines'] }), { elargi: true })
+    const s = (m) => r.tous.find((x) => x.metier.code_rome === m.code_rome).score
+    expect(s(psy)).toBe(1)
+    expect(s(lavage)).toBeCloseTo(0.3)
+    const sans = rechercher([lavage], portrait({ interets: ['psychologie_et_relations_humaines'] }), { elargi: true })
+    expect(sans.tous[0].score).toBeCloseTo(0.5)
+  })
+})

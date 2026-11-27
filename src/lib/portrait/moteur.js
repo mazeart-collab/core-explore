@@ -82,6 +82,7 @@ function indexer(m) {
       competences: new Set(e.competences_categories || []),
       interets: new Set(e.centres_interet || []),
       interetsListe: e.centres_interet || [],
+      liens: e.liens || null,
       sens: new Set(e.sens_causes || []),
       motivations: new Set(e.motivations || []),
     },
@@ -100,6 +101,9 @@ const hasAny = (set, list) => list.some((x) => set.has(x))
  * classées de la plus à la moins caractéristique (la 1re compte plus que la 4e).
  */
 const RANG = [1, 0.75, 0.5, 0.35]
+/** Crédit d'un lien noté de 1 à 3 par l'IA (enrichi_ia.liens, script « noter-liens »). */
+const CREDIT_NOTE = { 3: 1, 2: 0.65, 1: 0.3 }
+const creditLien = (notes, taxo) => CREDIT_NOTE[Math.max(0, ...taxo.map((t) => notes?.[t] || 0))] ?? 0
 const forceRang = (liste, taxo) => {
   const i = liste.findIndex((x) => taxo.includes(x))
   return i < 0 ? 0 : (RANG[i] ?? RANG[RANG.length - 1])
@@ -290,7 +294,8 @@ export function evaluer(metier, prep) {
       if (isPerso(id)) {
         const w = words(persoLabel(id)).filter((x) => x.length >= 4)
         c = w.length && w.every((x) => ix.texte.includes(stem(x))) ? 0.7 : 0
-      } else c = forceRang(ix.tags.interetsListe, INTERETS_BY_ID[id]?.taxo || [])
+      } else if (ix.tags.liens) c = creditLien(ix.tags.liens.interets, INTERETS_BY_ID[id]?.taxo || [])
+      else c = forceRang(ix.tags.interetsListe, INTERETS_BY_ID[id]?.taxo || [])
       credits.push(c)
       if (c) items.push(isPerso(id) ? persoLabel(id) : INTERETS_BY_ID[id].libelle)
     }
@@ -303,11 +308,13 @@ export function evaluer(metier, prep) {
     const credits = []
     const items = []
     const selonStructure = []
-    const transversal = ix.secteurs.length >= 3 && !ix.tags.sens.size
+    const liensSens = ix.tags.liens?.sens
+    const transversal = ix.secteurs.length >= 3 && !(liensSens ? Object.keys(liensSens).length : ix.tags.sens.size)
     for (const id of p.sens) {
       const c = CONTRIBUTIONS_BY_ID[id]
-      if (hasAny(ix.tags.sens, c.taxo)) {
-        credits.push(1)
+      const credit = liensSens ? creditLien(liensSens, c.taxo) : hasAny(ix.tags.sens, c.taxo) ? 1 : 0
+      if (credit) {
+        credits.push(credit)
         items.push(c.libelle.replace(/\.$/, ''))
       } else if (transversal) {
         credits.push(0.3)
@@ -335,8 +342,9 @@ export function evaluer(metier, prep) {
       }
       const w = prep.prio.includes(id) ? 2 : 1
       max += w
-      if (hasAny(ix.tags.motivations, mo.taxo)) {
-        gagne += w
+      const credit = ix.tags.liens ? creditLien(ix.tags.liens.motivations, mo.taxo) : hasAny(ix.tags.motivations, mo.taxo) ? 1 : 0
+      if (credit) {
+        gagne += w * credit
         items.push(prep.prio.includes(id) ? `${mo.libelle} (prioritaire)` : mo.libelle)
       }
     }

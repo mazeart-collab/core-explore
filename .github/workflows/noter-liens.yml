@@ -1,0 +1,82 @@
+name: "4. Noter les liens des métiers (IA)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Nombre de métiers à traiter (vide ou « all » = tous les restants)"
+        type: string
+        default: "20"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  liens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifier les prérequis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Secret ANTHROPIC_API_KEY absent : ajoutez-le dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          if [ ! -f public/data/metiers.json ]; then
+            echo "::error::public/data/metiers.json introuvable."
+            exit 1
+          fi
+
+      - name: Noter les liens
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          LIMIT="$(echo "$LIMIT" | tr -d '[:space:]')"
+          if [ -z "$LIMIT" ] || [ "$LIMIT" = "all" ]; then
+            npm run data:liens
+          elif [[ "$LIMIT" =~ ^[0-9]+$ ]]; then
+            npm run data:liens -- --limit="$LIMIT"
+          else
+            echo "::error::limit doit être un nombre, vide ou « all » (reçu : $LIMIT)."
+            exit 1
+          fi
+
+      # Exécuté même en cas d'échec ou d'annulation, pour ne pas perdre (ni repayer) les métiers déjà notés.
+      - name: Enregistrer metiers.json et la progression
+        if: always()
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f data/.liens-progress.jsonl ]; then
+            npm run data:liens -- --build-only
+          fi
+          git add public/data/metiers.json
+          [ -f data/.liens-progress.jsonl ] && git add -f data/.liens-progress.jsonl
+          if git diff --cached --quiet; then
+            echo "Aucun changement à enregistrer."
+            exit 0
+          fi
+          git commit -m "Données : liens métiers notés par l'IA ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
